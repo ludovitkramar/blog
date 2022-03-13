@@ -1,17 +1,53 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
+import { BrowserRouter, Routes, Route, Outlet, Link } from 'react-router-dom';
 import './index.css';
-import App from './App';
-import reportWebVitals from './reportWebVitals';
+import RsyncCommands from "./articles/rsync_commands.js";
+
+class Article extends React.Component {
+  render() {
+    return (
+      <RsyncCommands />
+    )
+  }
+}
+
+function Nav() {
+  return (
+    <>
+      <nav>
+        <ul>
+          <li><Link to="/">Home</Link></li>
+          <li><Link to="q">q</Link></li>
+          <li><Link to="/qad">Link to nowhere</Link></li>
+          <li><Link to="/Article">article</Link></li>
+        </ul>
+      </nav>
+      <Outlet />
+    </>
+  );
+}
+
+class Page extends React.Component {
+  render() {
+    return (
+      <BrowserRouter>
+        <Routes>
+          <Route path="/" element={<Nav />}>
+            <Route index element={<span>index</span>} />
+            <Route path="q" element={<Article />} />
+            <Route path="Article" element={<RsyncCommands />} />
+            <Route path="*" element={<span>404 error</span>} />
+          </Route>
+        </Routes>
+      </BrowserRouter>
+    );
+  }
+}
 
 ReactDOM.render(
   <React.StrictMode>
-    <App />
+    <Page />
   </React.StrictMode>,
   document.getElementById('root')
 );
-
-// If you want to start measuring performance in your app, pass a function
-// to log results (for example: reportWebVitals(console.log))
-// or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
-reportWebVitals();
