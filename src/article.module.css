@@ -1,0 +1,62 @@
+.article {
+    color: rgb(26, 26, 26);
+    margin: 0 auto;
+    margin-top: 1em;
+    margin-bottom: 1em;
+    width: 800px;
+    padding: 1em;
+    background-color: white;
+}
+
+.p {
+    color: rgb(39, 39, 39);
+    margin-bottom: .4em;
+    margin-top: .4em;
+}
+
+.code {
+    color: rgb(88, 88, 88);
+    background-color: rgb(246, 246, 246);
+    border: 1px solid #bbb;
+}
+
+
+.ol {
+    margin-top: .4em;
+    margin-bottom: .4em;
+}
+
+.ul {
+    margin-top: .4em;
+    margin-bottom: .4em;
+}
+
+.li {
+    color: rgb(61, 61, 61);
+    line-height: 1.5em;
+}
+
+.small {
+    color: rgb(153, 153, 153);
+}
+
+.h1 {
+    color: rgb(20, 97, 197);
+}
+
+.a {
+    color: rgb(89, 160, 204);
+}
+
+.a:hover {
+    color: rgb(107, 178, 223);
+    text-decoration: none;
+}
+
+.img {
+    height: 300px;
+    display: block;
+    margin: 0 auto;
+    margin-bottom: 1em;
+    margin-top: 1em;
+}
