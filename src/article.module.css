@@ -1,25 +1,46 @@
 .article {
-    color: rgb(26, 26, 26);
+    --text-color: rgb(39, 39, 39);
+    --article-background-color: white;
+    --code-text-color: rgb(88, 88, 88);
+    --code-background-color: rgb(246, 246, 246);
+    --code-border-color: #bbb;
+    --list-item-text-color: rgb(61, 61, 61);
+    --small-text-color: rgb(153, 153, 153);
+    --title-text-color: rgb(20, 97, 197);
+    --link-text-color: rgb(89, 160, 204);
+    --link-hover-color: rgb(107, 178, 223);
+    color: var(--text-color);
     margin: 0 auto;
     margin-top: 1em;
     margin-bottom: 1em;
     max-width: 800px;
     padding: 1em;
-    background-color: white;
+    background-color: var(--article-background-color);
 }
 
 .p {
-    color: rgb(39, 39, 39);
+    color: var(--text-color);
     margin-bottom: .4em;
     margin-top: .4em;
 }
 
-.code {
-    color: rgb(88, 88, 88);
-    background-color: rgb(246, 246, 246);
-    border: 1px solid #bbb;
+.span {
+    color: var(--text-color);
 }
 
+.code {
+    color: var(--code-text-color);
+    background-color: var(--code-background-color);
+    border: 1px solid var(--code-border-color);
+    padding: .2em;
+    line-height: 1.2em;
+    font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New', monospace;
+}
+
+.code > * {
+    color: var(--code-text-color);
+    font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New', monospace;
+}
 
 .ol {
     margin-top: .4em;
@@ -32,24 +53,24 @@
 }
 
 .li {
-    color: rgb(61, 61, 61);
+    color: var(--list-item-text-color);
     line-height: 1.5em;
 }
 
 .small {
-    color: rgb(153, 153, 153);
+    color: var(--small-text-color);
 }
 
 .h1 {
-    color: rgb(20, 97, 197);
+    color: var(--title-text-color);
 }
 
 .a {
-    color: rgb(89, 160, 204);
+    color: var(--link-text-color);
 }
 
 .a:hover {
-    color: rgb(107, 178, 223);
+    color: var(--link-hover-color);
     text-decoration: none;
 }
 
@@ -59,4 +80,20 @@
     margin: 0 auto;
     margin-bottom: 1em;
     margin-top: 1em;
+    max-width: 70%;
+}
+
+@media (prefers-color-scheme: dark) {
+.article {
+    --text-color: rgb(228, 228, 228);
+    --article-background-color: rgb(39, 39, 39);
+    --code-text-color: rgb(202, 202, 202);
+    --code-background-color: rgb(63, 63, 63);
+    --code-border-color: rgb(77, 77, 77);
+    --list-item-text-color: rgb(185, 185, 185);
+    --small-text-color: rgb(117, 117, 117);
+    --title-text-color: rgb(57, 139, 246);
+    --link-text-color: rgb(109, 190, 240);
+    --link-hover-color: rgb(141, 211, 255);
+}
 }
