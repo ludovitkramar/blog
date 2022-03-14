@@ -52,7 +52,13 @@ function UnorderedList(props) {
 
 function Paragraph(props) {
     return (
-        <p className={style.p}>{props.text}</p>
+        <p className={style.p}>{props.content}</p>
+    );
+}
+
+function Text(props) {
+    return (
+        <span className={style.span}>{props.text}</span>
     );
 }
 
@@ -65,6 +71,16 @@ function Small(props) {
 function Code(props) {
     return (
         <code className={style.code}>{props.code}</code>
+    );
+}
+
+function Codeblock(props) {
+    return (
+        <div className={style.code}>
+            <code>
+                {props.code}
+            </code>
+        </div>
     );
 }
 
@@ -81,13 +97,14 @@ class Article extends React.Component {
                 <Title text="Title of article"></Title>
 
                 <Paragraph
-                    text="Lorem ipsumLorem ipsumLorem ipsumLorem ipsumLorem ipsumLorem ipsumLorem ipsumLorem ipsumLorem ipsumLorem ipsumLorem ipsum">
-
+                    content={<Text text='Lorem ipsumLorem ipsumLorem ips
+                    umLorem ipsumLorem ipsumLorem ipsumLorem ipsumLore
+                    m ipsumLorem ipsumLorem ipsumLorem ipsum' />}>
                 </Paragraph>
-                
-                <Code code="Code block
+
+                <Codeblock code="Code block
                 aksdjfhakldfs aksdjfhakldfs 
-                aksdjfhakldfimg1s aksdjfhakldfs aksdjfhakldfs aksdjfhakldfs aksdjfhakldfs aksdjfhakldfs aksdjfhakldfs aksdjfhakldfs aksdjfhakldfs aksdjfhakldfs aksdjfhakldfs aksdjfhakldfs aksdjfhakldfs aksdjfhakldfs aksdjfhakldfs aksdjfhakldfs aksdjfhakldfs aksdjfhakldfs aksdjfhakldfs aksdjfhakldfs aksdjfhakldfs aksdjfhakldfs aksdjfhakldfs aksdjfhakldfs aksdjfhakldfs aksdjfhakldfs aksdjfhakldfs aksdjfhakldfs aksdjfhakldfs aksdjfhakldfs aksdjfhakldfs aksdjfhakldfs aksdjfhakldfs"></Code>
+                aksdjfhakldfimg1s aksdjfhakldfs aksdjfhakldfs aksdjfhakldfs aksdjfhakldfs aksdjfhakldfs aksdjfhakldfs aksdjfhakldfs aksdjfhakldfs aksdjfhakldfs aksdjfhakldfs aksdjfhakldfs aksdjfhakldfs aksdjfhakldfs aksdjfhakldfs aksdjfhakldfs aksdjfhakldfs aksdjfhakldfs aksdjfhakldfs aksdjfhakldfs aksdjfhakldfs aksdjfhakldfs aksdjfhakldfs aksdjfhakldfs aksdjfhakldfs aksdjfhakldfs aksdjfhakldfs aksdjfhakldfs aksdjfhakldfs aksdjfhakldfs aksdjfhakldfs aksdjfhakldfs aksdjfhakldfs" />
 
                 <Image src={img1} alt="An image"></Image>
 
@@ -97,17 +114,43 @@ class Article extends React.Component {
                         'I am a list item 3']} />
 
                 <Paragraph
-                    text={<>I am a generated paragraph.<Link to="/" className={style.a}>With a ink to index</Link></>}>
+                    content={<>I am a generated paragraph.<Link to="/" className={style.a}>With a ink to index</Link></>}>
                 </Paragraph>
+
+                <Paragraph content={
+                    <>
+                        <Text text="This is the start of a paragraph with a " />
+                        <Code code="code section"></Code>
+                        <Text text=" and some mor alksjhd lashdlakj slas da s dlashl dhakjs hmee text." />
+                        <Text text=" and some more text." />
+                        <Text text=" and so alksjhd lashdlakj slas da s dlashl dhakjs hme more text." />
+                        <Text text=" and some more text." />
+                        <Text text=" and some more text." />
+                        <Text text=" and  alksjhd lashdlakj slas da s dlashl dhakjs hmesome alksjhd lashdlakj slas da s dlashl dhakjs hme more text." />
+                        <Text text=" and some more text." />
+                        <Text text=" and some more text." />
+                        <Text text=" and s alksjhd lashdlakj slas da s dlashl dhakjs hmeome more text." />
+                        <Text text=" and some alksjhd lashdlakj slas da s dlashl dhakjs hme more text." />
+                        <Code code="code section"></Code>
+                        <Text text=" and some more text." />
+                        <Text text=" and some more text." />
+                        <Text text=" and some m alksjhd lashdlakj slas da s dlashl dhakjs hmeore text." />
+                        <Text text=" and some  alksjhd lashdlakj slas da s dlashl dhakjs hmemore text." />
+                        <Text text=" and some more text." />
+                        <Text text=" and some more text." />
+                        <Text text=" and some more text." />
+                        <Text text=" and some m alksjhd lashdlakj slas da s dlashl dhakjs hmeore text." />
+                        <Text text=" and some more text." />
+                        <Text text=" and some more text." />
+                    </>
+                } />
 
                 <OrderedList
                     list={['I am an ordered list item 1',
                         'I am an ordered list item 2',
                         'I am an ordered list item 3']} />
 
-                <Small text="
-                I am small text.
-                "></Small>
+                <Small text="I am small text."></Small>
             </article>
         );
     };
