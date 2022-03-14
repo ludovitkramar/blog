@@ -3,7 +3,7 @@
     margin: 0 auto;
     margin-top: 1em;
     margin-bottom: 1em;
-    width: 800px;
+    max-width: 800px;
     padding: 1em;
     background-color: white;
 }
