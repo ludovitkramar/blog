@@ -14,9 +14,9 @@ class Page extends React.Component {
           <Route path="/" element={<Nav />}>
             <Route index element={<span>index</span>} />
             <Route path="*" element={<span>404 error</span>} />
-            {articles.map((e) => {
+            {articles.map((e, i) => {
               return (
-                <Route path={"/article/"+e} element={<Article article={e} />} />
+                <Route key={i} path={"/article/"+e} element={<Article article={e} />} />
               )
             })}
           </Route>

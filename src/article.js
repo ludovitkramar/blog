@@ -5,11 +5,33 @@ import { Link } from "react-router-dom";
 import img1 from './articles/img/qt-default.png';
 
 export default class Article extends React.Component {
+    // constructor(props) {
+    //     super(props);
+    //     this.state = {
+    //         test: null,
+    //         articleSource: null,
+    //     };
+    //     // import(`./articles/${this.props.article}.md`).then(
+    //     //     allModuleExports => {
+    //     //         console.log(allModuleExports.default);
+    //     //         //this.setState({test: allModuleExports.default})
+    //     //         this.state.test = allModuleExports.default;
+    //     //     },
+    //     //     error => {
+    //     //         console.error(error)
+    //     //     },
+    //     // )
+    // }
+    
     render() {
-
+        //const articleSource = React.lazy(() => import(`./articles/${this.props.article}.md`));
+        
+        //console.log(articleSource)
         return (
             <article className={style.article}>
                 <Title text={this.props.article}></Title>
+
+                {/* <Paragraph content={`source= ${this.state.test}`} /> */}
 
                 <Paragraph
                     content={<Text text='Lorem ipsumLorem ipsumLorem ips
