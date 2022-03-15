@@ -18,9 +18,6 @@ function Nav() {
       <nav className={style.nav}>
         <ul>
           <li><Link to="/">Home</Link></li>
-          <li><Link to="q">Article</Link></li>
-          <li><Link to="/qad">Link to nowhere</Link></li>
-          <li><Link to="/Article">nowhere</Link></li>
           {mapArticles(articles)}
         </ul>
       </nav>
