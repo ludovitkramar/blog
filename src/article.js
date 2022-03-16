@@ -49,7 +49,7 @@ export default function Article(props) {
                 aksdjfhakldfs aksdjfhakldfs 
                 aksdjfhakldfimg1s aksdjfhakldfs aksdjfhakldfs aksdjfhakldfs aksdjfhakldfs aksdjfhakldfs aksdjfhakldfs aksdjfhakldfs aksdjfhakldfs aksdjfhakldfs aksdjfhakldfs aksdjfhakldfs aksdjfhakldfs aksdjfhakldfs aksdjfhakldfs aksdjfhakldfs aksdjfhakldfs aksdjfhakldfs aksdjfhakldfs aksdjfhakldfs aksdjfhakldfs aksdjfhakldfs aksdjfhakldfs aksdjfhakldfs aksdjfhakldfs aksdjfhakldfs aksdjfhakldfs aksdjfhakldfs aksdjfhakldfs aksdjfhakldfs aksdjfhakldfs aksdjfhakldfs aksdjfhakldfs" />
 
-            <Image src='http://localhost:8888/media/qt-default.png' alt="An image"></Image>
+            <Image src={settings.apiURL+'/media/qt-default.png'} alt="An image"></Image>
 
             <UnorderedList
                 list={['I am a list item 1',
