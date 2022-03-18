@@ -3,8 +3,6 @@ import style from './article.module.css';
 import { Link } from "react-router-dom";
 import settings from "./settings";
 
-// import img1 from './articles/img/qt-default.png';
-
 export default function Article(props) {
     const [data, setData] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -33,13 +31,70 @@ export default function Article(props) {
     if (loading) return <article className={style.article}>Loading...</article>;
     if (error) return <article className={style.article}>Error</article>
 
+    console.log(data)
+
+    var graph = [2, 1, 0, 1]; //kantenliste
+    var knoten = { 0: ['root'], 1: data.split('\n'), };
+    const spetialChars = ['#', ' ', '-', '*', '`', '<', '!'];
+
+    function parse(G, k) {
+        function addNode(content) { //content is expected to always be an array
+            const nodeCount = G[0];
+            const newLastNote = nodeCount;
+            const kantenCount = G[1];
+            const currentLastNode = nodeCount - 1;
+            const currentLastNodeContentsCopy = k[currentLastNode];
+            k[currentLastNode] = content
+            k[newLastNote] = currentLastNodeContentsCopy.slice(1,);
+            G[0] += 1 //add one to nodes count
+            G[1] += 1 //add one to kanten count
+            G.push(0);
+            G.push(newLastNote)
+            console.log(G)
+            console.log(k)
+        }
+        var index = 1;
+        const knot = k[index] //array of things to be parsed
+        const current = knot[0] //string to be parsed
+        if (spetialChars.indexOf(current[0]) !== -1) { //if first letter of the string is a spetial character
+            console.log('Spetial Char in:' + current);
+            switch (current[0]) { //if it is a single line spetial character
+                case '#':
+                    //is a title
+                    addNode([current]);
+                    break;
+                case '!':
+                    //is an image
+                    break;
+                case '<':
+                    //is <small>
+                    break;
+                default:
+                    break;
+            }
+        } else {
+            console.log('No spetial Char in:' + current);
+        }
+
+        // for (const key in k) {
+        //     console.log(key)
+        //     if (k[key].length > 1) {
+        //         parse([2, 1, 0, 1], { 0: ['root'], 1: k[key] })
+        //     } else {
+        //         return
+        //     }
+        // }
+    }
+
+    parse(graph, knoten);
+
     return (
         <article className={style.article}>
             <Title text={props.article}></Title>
 
             <Paragraph content={data} />
 
-            <Paragraph
+            {/* <Paragraph
                 content={<Text text='Lorem ipsumLorem ipsumLorem ips
                     umLorem ipsumLorem ipsumLorem ipsumLorem ipsumLore
                     m ipsumLorem ipsumLorem ipsumLorem ipsum' />}>
@@ -86,7 +141,7 @@ export default function Article(props) {
                     <Text text=" and some more text." />
                     <Text text=" and some more text." />
                 </>
-            } />
+            } /> */}
 
             <OrderedList
                 list={['I am an ordered list item 1',
