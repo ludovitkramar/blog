@@ -1,9 +1,8 @@
 import { Outlet, Link } from "react-router-dom";
 import style from './navigation.module.css';
-import Articles from './articles/articles.js'
 
 
-export default function Nav() {
+export default function Nav(props) {
   function mapArticles(array) {
     const links = array.map((e, i) => {
       return (
@@ -19,7 +18,7 @@ export default function Nav() {
       <nav className={style.nav}>
         <ul>
           <li><Link to="/">Home</Link></li>
-          {mapArticles(Articles())}
+          {mapArticles(props.articlesList)}
         </ul>
       </nav>
       <Outlet />
