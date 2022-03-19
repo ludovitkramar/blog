@@ -34,121 +34,138 @@ export default function Article(props) {
     console.log(data)
 
     var graph = [2, 1, 0, 1]; //kantenliste
-    var knoten = { 0: ['root'], 1: data.split('\n'), };
-    const spetialChars = ['#', ' ', '-', '*', '`', '<', '!'];
+    var knoten = { 0: [0], 1: data.split('\n'), };
+    var knoteTypes = { 0: 'root', 1: null, };
+    const spetialChars = ['#', '-', '*', '`', '<', '!'];
 
-    function parse(G, k) {
-        function addNode(content) { //content is expected to always be an array
+    function parse(G, k, kTypes) {
+        k[0][0] += 1; //count rescursions.
+        const knot = k[1] //array of things to be parsed
+        const current = knot[0] //string to be parsed
+        function addNode(content, type) { //content is expected to always be an array
             const nodeCount = G[0];
             const newLastNote = nodeCount;
             const kantenCount = G[1];
             const currentLastNode = nodeCount - 1;
             const currentLastNodeContentsCopy = k[currentLastNode];
             k[currentLastNode] = content
-            k[newLastNote] = currentLastNodeContentsCopy.slice(1,);
+            kTypes[currentLastNode] = type
+            k[newLastNote] = currentLastNodeContentsCopy.slice(content.length,);
+            kTypes[newLastNote] = null
             G[0] += 1 //add one to nodes count
             G[1] += 1 //add one to kanten count
             G.push(0);
             G.push(newLastNote)
             console.log(G)
             console.log(k)
+            console.log(kTypes)
         }
-        var index = 1;
-        const knot = k[index] //array of things to be parsed
-        const current = knot[0] //string to be parsed
-        if (spetialChars.indexOf(current[0]) !== -1) { //if first letter of the string is a spetial character
+        function complexAddNode(string) { //content is expected to always be an array
+            if (!isNaN(string.split(' ', 1) * 1)) { //if starts with a number
+                var i = 0;
+                while (!isNaN(knot[i].split(' ', 1) * 1) || knot[i].slice(0, 1) == ' ') { //text starts with number or white space
+                    if (i + 1 == knot.lengh) break;
+                    i += 1;
+                }
+                const listArray = knot.slice(0, i) //include in node until i
+                addNode(listArray, 'ol')
+            } else if (string.split(' ', 1) == '-' || string.split(' ', 1) == '*') { //if its an unordered list
+                var i = 0;
+                while (knot[i].split(' ', 1) == '-' || knot[i].split(' ', 1) == '*' || knot[i].slice(0, 1) == ' ') { //text starts with - or * or white space
+                    if (i + 1 == knot.lengh) break;
+                    i += 1;
+                }
+                const listArray = knot.slice(0, i) //include in node until i
+                addNode(listArray, 'ul')
+            } else if (string == '```') { //if it's code block
+                var i = 1;
+                while (knot[i] !== '```') { //text isn't ```
+                    if (i + 1 == knot.lengh) break;
+                    i += 1;
+                }
+                const listArray = knot.slice(0, i + 1) //include in node until i + 1
+                addNode(listArray, 'codeBlock')
+            }
+        }
+        if (current === '') {//if current string is empty delete it from the knoten
+            knot.slice(1,);
+        } else if (spetialChars.indexOf(current[0]) !== -1 || !isNaN(current.split(' ', 1) * 1)) { //if first letter of the string is a spetial character or starts with number followed by dot
             console.log('Spetial Char in:' + current);
             switch (current[0]) { //if it is a single line spetial character
                 case '#':
                     //is a title
-                    addNode([current]);
+                    addNode([current], 'Title');
                     break;
                 case '!':
                     //is an image
+                    addNode([current], 'Image');
                     break;
                 case '<':
                     //is <small>
+                    addNode([current], 'Small');
                     break;
                 default:
+                    complexAddNode(current);
                     break;
             }
-        } else {
+        } else { //add normal patagraph
             console.log('No spetial Char in:' + current);
+            addNode([current], 'Paragraph')
+        }
+
+        function findParentOf(node) {
+            const array = G.slice(2);
+            for (var i = 1; i < array.length; i += 2) {
+                if (array[i] == node) return array[i - 1];
+            }
+        }
+
+        function mergeGraphs(cG, ck, ckTypes, node) { //merge with parent of original null {node}
+            const parentNode = findParentOf(node);
+            console.log(`parendNode= ${parentNode}`);
+            k[node] = ck[1];
+            kTypes[node] = ckTypes[1];
+            addNode(ck[2], null);
+
+        }
+        console.log('Recursions: '+ k[0][0])
+        for (const key in kTypes) {
+            if (k[0][0] > 4) { // if there are more than 4 recursions
+                console.warn('Max recursions: '+ k[0][0])
+                break
+            } else if (kTypes[key] == null) { // if there's a node with null type
+                console.log(`found ${k[key]} with null type`);
+                const [childG, childK, childKTypes] = parse([2, 1, 0, 1], { 0: [k[0][0]], 1: k[key] }, { 0: 'root', 1: null, });
+                console.log(childG);
+                console.log(childK);
+                console.log(childKTypes);
+                mergeGraphs(childG, childK, childKTypes, key);
+            }
         }
 
         // for (const key in k) {
         //     console.log(key)
         //     if (k[key].length > 1) {
-        //         parse([2, 1, 0, 1], { 0: ['root'], 1: k[key] })
+        //         parse([2, 1, 0, 1], { 0: [], 1: k[key] }, {0: 'root', 1: null,})
         //     } else {
         //         return
         //     }
         // }
+
+        return [G, k, kTypes]
     }
 
-    parse(graph, knoten);
+    const resultArray = parse(graph, knoten, knoteTypes);
+    console.log('Results:');
+    console.log(resultArray[0]);
+    console.log(resultArray[1]);
+    console.log(resultArray[2]);
 
     return (
         <article className={style.article}>
             <Title text={props.article}></Title>
 
             <Paragraph content={data} />
-
-            {/* <Paragraph
-                content={<Text text='Lorem ipsumLorem ipsumLorem ips
-                    umLorem ipsumLorem ipsumLorem ipsumLorem ipsumLore
-                    m ipsumLorem ipsumLorem ipsumLorem ipsum' />}>
-            </Paragraph>
-
-            <Codeblock code="Code block
-                aksdjfhakldfs aksdjfhakldfs 
-                aksdjfhakldfimg1s aksdjfhakldfs aksdjfhakldfs aksdjfhakldfs aksdjfhakldfs aksdjfhakldfs aksdjfhakldfs aksdjfhakldfs aksdjfhakldfs aksdjfhakldfs aksdjfhakldfs aksdjfhakldfs aksdjfhakldfs aksdjfhakldfs aksdjfhakldfs aksdjfhakldfs aksdjfhakldfs aksdjfhakldfs aksdjfhakldfs aksdjfhakldfs aksdjfhakldfs aksdjfhakldfs aksdjfhakldfs aksdjfhakldfs aksdjfhakldfs aksdjfhakldfs aksdjfhakldfs aksdjfhakldfs aksdjfhakldfs aksdjfhakldfs aksdjfhakldfs aksdjfhakldfs aksdjfhakldfs" />
-
-            <Image src={settings.apiURL+'/media/qt-default.png'} alt="An image"></Image>
-
-            <UnorderedList
-                list={['I am a list item 1',
-                    'I am a list item 2',
-                    'I am a list item 3']} />
-
-            <Paragraph
-                content={<>I am a generated paragraph.<Link to="/" className={style.a}>With a ink to index</Link></>}>
-            </Paragraph>
-
-            <Paragraph content={
-                <>
-                    <Text text="This is the start of a paragraph with a " />
-                    <Code code="code section"></Code>
-                    <Text text=" and some mor alksjhd lashdlakj slas da s dlashl dhakjs hmee text." />
-                    <Text text=" and some more text." />
-                    <Text text=" and so alksjhd lashdlakj slas da s dlashl dhakjs hme more text." />
-                    <Text text=" and some more text." />
-                    <Text text=" and some more text." />
-                    <Text text=" and  alksjhd lashdlakj slas da s dlashl dhakjs hmesome alksjhd lashdlakj slas da s dlashl dhakjs hme more text." />
-                    <Text text=" and some more text." />
-                    <Text text=" and some more text." />
-                    <Text text=" and s alksjhd lashdlakj slas da s dlashl dhakjs hmeome more text." />
-                    <Text text=" and some alksjhd lashdlakj slas da s dlashl dhakjs hme more text." />
-                    <Code code="code section"></Code>
-                    <Text text=" and some more text." />
-                    <Text text=" and some more text." />
-                    <Text text=" and some m alksjhd lashdlakj slas da s dlashl dhakjs hmeore text." />
-                    <Text text=" and some  alksjhd lashdlakj slas da s dlashl dhakjs hmemore text." />
-                    <Text text=" and some more text." />
-                    <Text text=" and some more text." />
-                    <Text text=" and some more text." />
-                    <Text text=" and some m alksjhd lashdlakj slas da s dlashl dhakjs hmeore text." />
-                    <Text text=" and some more text." />
-                    <Text text=" and some more text." />
-                </>
-            } /> */}
-
-            <OrderedList
-                list={['I am an ordered list item 1',
-                    'I am an ordered list item 2',
-                    'I am an ordered list item 3']} />
-
-            <Small text="I am small text."></Small>
         </article>
     );
 }
@@ -156,6 +173,24 @@ export default function Article(props) {
 function Title(props) {
     return (
         <h1 className={style.h1}>{props.text}</h1>
+    );
+}
+
+function H2(props) {
+    return (
+        <h2 className={style.h2}>{props.text}</h2>
+    );
+}
+
+function H3(props) {
+    return (
+        <h3 className={style.h3}>{props.text}</h3>
+    );
+}
+
+function H4(props) {
+    return (
+        <h4 className={style.h4}>{props.text}</h4>
     );
 }
 
