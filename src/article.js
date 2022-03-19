@@ -81,21 +81,45 @@ export default function Article(props) {
             if (!isNaN(beforeFirstWhiteSpace * 1)) { //if its a number, ol
                 consumeLine(1); //TODO
             } else if (isLineImage(line)) {
-                console.warn(line + 'is an image'); //img
-                createNode('Image', line);
+                console.warn(line + ' is an image'); //img
+                function extractSource(input) {
+                    var src = input.substring(line.indexOf('(') + 1, line.indexOf('"')); //between ( and "
+                    src = src.replace(' ', ''); //remove white spaces
+                    if (src.slice(0, 4) == 'http') return src //if starts with http leave as is
+                    return src.slice(src.lastIndexOf('/') + 1) //otherwise take only what's after /
+                }
+                const imgProperties = {
+                    src: extractSource(line),
+                    alt: line.substring(line.indexOf('[') + 1, line.indexOf(']')),
+                    title: line.substring(line.indexOf('"') + 1, line.lastIndexOf('"')),
+                }
+                createNode('Image', imgProperties);
                 consumeLine(1);
-            } else if (isLineHeading(beforeFirstWhiteSpace)) {  //heading
+            } else if (isLineHeading(beforeFirstWhiteSpace)) {  //headings or title
                 console.warn(line + 'is heading');
-                createNode('Title', line);
+                const text = line.slice(beforeFirstWhiteSpace.length + 1); //remove #s from text
+                switch (beforeFirstWhiteSpace.length) {
+                    case 1:
+                        createNode('Title', text);
+                        break;
+                    case 2:
+                        createNode('H2', text);
+                        break;
+                    case 3:
+                        createNode('H3', text);
+                        break;
+                    default:
+                        createNode('H4', text);
+                        break;
+                }
                 consumeLine(1);
             } else if (beforeFirstWhiteSpace == '-' || beforeFirstWhiteSpace == '*') { //ul
                 consumeLine(1); //TODO
-            } else if (beforeFirstWhiteSpace == '```') {
+            } else if (beforeFirstWhiteSpace == '```') { //code block
                 consumeLine(1); //TODO
             }
-            // consumeLine(1)
         }
-
+        [].flat()
         function createNode(type, content) {
             const newNodeNumber = getNodesCount();
             graph.push(currentParentNode);
@@ -124,9 +148,8 @@ export default function Article(props) {
             };
         }
 
-        // for (const line in markdown) 
         var line = 0
-        while (markdown.length > 0) {
+        while (markdown.length > 0) { //process until there's no more lines
             console.warn('Progress:');
             console.log(`line:${line}`);
             console.log(`line:${markdown[0]}`)
@@ -257,6 +280,6 @@ function Codeblock(props) {
 
 function Image(props) {
     return (
-        <img src={props.src} alt={props.alt} className={style.img}></img>
+        <img src={props.src} alt={props.alt} title={props.title} className={style.img}></img>
     )
 }
