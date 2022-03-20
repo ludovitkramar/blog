@@ -39,7 +39,6 @@ export default function Article(props) {
 
     function parser(markdown, graph, nodeData, nodeType) {
         const newlineSpetialCharacters = ['# ', '##', '- ', '* ', '``', '!['];
-        var currentParentNode = 0;
         function getNodesCount() { return graph[0] };
         function updateNodesLinksCount() {
             const linksArray = graph.slice(2);
@@ -56,7 +55,7 @@ export default function Article(props) {
 
         function isLineImage(line) {
             var isImage = true;
-            if (!line.slice(0, 2) == '![') isImage = false //if starts correctly
+            if (!line.slice(0, 2) === '![') isImage = false //if starts with ![
             //bellow checks order of things
             if (line.indexOf('!') > line.indexOf('[')) isImage = false;
             if (line.indexOf('[') > line.indexOf(']')) isImage = false;
@@ -76,16 +75,16 @@ export default function Article(props) {
             return isHeading
         }
 
-        function handleLineWithSpetialCharacters(line) {
+        function handleLineWithSpetialCharacters(line, rootNode) {
             const beforeFirstWhiteSpace = line.split(' ', 1)[0];
             if (!isNaN(beforeFirstWhiteSpace * 1)) { //if its a number, ol
+                console.warn(`${line} is ol`)
                 consumeLine(1); //TODO
             } else if (isLineImage(line)) {
-                console.warn(line + ' is an image'); //img
                 function extractSource(input) {
                     var src = input.substring(line.indexOf('(') + 1, line.indexOf('"')); //between ( and "
                     src = src.replace(' ', ''); //remove white spaces
-                    if (src.slice(0, 4) == 'http') return src //if starts with http leave as is
+                    if (src.slice(0, 4) === 'http') return src //if starts with http leave as is
                     return src.slice(src.lastIndexOf('/') + 1) //otherwise take only what's after /
                 }
                 const imgProperties = {
@@ -93,79 +92,103 @@ export default function Article(props) {
                     alt: line.substring(line.indexOf('[') + 1, line.indexOf(']')),
                     title: line.substring(line.indexOf('"') + 1, line.lastIndexOf('"')),
                 }
-                createNode('Image', imgProperties);
+                createNode('Image', imgProperties, rootNode);
                 consumeLine(1);
             } else if (isLineHeading(beforeFirstWhiteSpace)) {  //headings or title
-                console.warn(line + 'is heading');
                 const text = line.slice(beforeFirstWhiteSpace.length + 1); //remove #s from text
                 switch (beforeFirstWhiteSpace.length) {
                     case 1:
-                        createNode('Title', text);
+                        createNode('Title', text, rootNode);
                         break;
                     case 2:
-                        createNode('H2', text);
+                        createNode('H2', text, rootNode);
                         break;
                     case 3:
-                        createNode('H3', text);
+                        createNode('H3', text, rootNode);
                         break;
                     default:
-                        createNode('H4', text);
+                        createNode('H4', text, rootNode);
                         break;
                 }
                 consumeLine(1);
-            } else if (beforeFirstWhiteSpace == '-' || beforeFirstWhiteSpace == '*') { //ul
-                consumeLine(1); //TODO
-            } else if (beforeFirstWhiteSpace == '```') { //code block
-                consumeLine(1); //TODO
+            } else if (beforeFirstWhiteSpace === '-' || beforeFirstWhiteSpace === '*') { //ul
+                console.warn(line + ' is ul');
+                const ulRootNode = createNode('UnorderedList', 0, rootNode);
+                var listLinesCount = 0;
+                var lastListItemNode = null;
+                for (const i in markdown) {
+                    const currentLineFirstCharacter = markdown[i][0];
+                    if (currentLineFirstCharacter !== '-' &&
+                        currentLineFirstCharacter !== '*' &&
+                        currentLineFirstCharacter !== ' ') break //if line doesn't start with - * or white space
+                    listLinesCount += 1;
+                    const listItem = markdown[i];
+                    if (currentLineFirstCharacter === ' ') { //if starts with empty line
+                        createNode('Paragraph', listItem, lastListItemNode); //TODO: find all following lines that start with spaces, calculate the number of spaces of the first line, slice it from all the lines and parse them as another markdown document
+                    } else { //starts with - or *
+                        lastListItemNode = createNode('listItem', listItem.slice(2), ulRootNode)
+                    }
+                }
+
+                consumeLine(listLinesCount);
+            } else if (line.slice(0, 3) === '```') { //code block
+                var codeLinesCount = 0;
+                for (const i in markdown) {
+                    if (i > 0 && markdown[i].slice(0, 3) === '```') break //if not first line and line starts with ```
+                    codeLinesCount += 1;
+                }
+                createNode('Codeblock', markdown.slice(1, codeLinesCount), rootNode)
+                consumeLine(codeLinesCount + 2);
             }
         }
-        [].flat()
-        function createNode(type, content) {
+
+        function createNode(type, content, parentNode) {
             const newNodeNumber = getNodesCount();
-            graph.push(currentParentNode);
+            graph.push(parentNode);
             graph.push(newNodeNumber);
             nodeData[newNodeNumber] = content;
             nodeType[newNodeNumber] = type;
             updateNodesLinksCount();
+            return newNodeNumber;
         }
 
         function consumeLine(quantity) {
             markdown = markdown.slice(quantity);
         }
 
-        function processLine(line) {
-            if (line == '') {
+        function processLine(line, rootNode) {
+            if (line === '') {
                 consumeLine(1)
                 return
             }
             const firstTwoCharacters = line.slice(0, 2);
-            if (newlineSpetialCharacters.includes(firstTwoCharacters) || !isNaN(firstTwoCharacters * 1) && firstTwoCharacters !== '  ') {
-                handleLineWithSpetialCharacters(line)
+            if (newlineSpetialCharacters.includes(firstTwoCharacters) || (!isNaN(firstTwoCharacters * 1) && firstTwoCharacters !== '  ')) {
+                handleLineWithSpetialCharacters(line, rootNode)
                 console.log('spetial chars: ' + line)
             } else {
-                createNode('Paragraph', line);
+                createNode('Paragraph', line, rootNode);
                 consumeLine(1);
             };
         }
 
-        var line = 0
+        var lineCount = 0
         while (markdown.length > 0) { //process until there's no more lines
-            console.warn('Progress:');
-            console.log(`line:${line}`);
+            console.log('🟡 Progress:');
+            console.log(`line:${lineCount}`);
             console.log(`line:${markdown[0]}`)
             console.log(markdown);
             console.log(graph);
             console.log(nodeData);
             console.log(nodeType);
-            processLine(markdown[0]);
-            line += 1;
+            processLine(markdown[0], 0);
+            lineCount += 1;
         }
 
         return [markdown, graph, nodeData, nodeType]
     }
 
     const [mdsrc, tree, treeContents, treeTags] = parser(data.split('\n'), G, nD, nT);
-    console.log('Results:');
+    console.log('🟢 Results:');
     console.log(mdsrc);
     console.log(tree);
     console.log(treeContents);
