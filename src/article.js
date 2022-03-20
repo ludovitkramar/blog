@@ -33,9 +33,9 @@ export default function Article(props) {
 
     console.log(data)
 
-    var G = [1, 0,]; //kantenliste
-    var nD = { 0: 0, };
-    var nT = { 0: 'root', };
+    const G = [1, 0,]; //kantenliste
+    const nD = { 0: 0, };
+    const nT = { 0: 'root', };
 
     function parser(markdown, graph, nodeData, nodeType) {
         const newlineSpetialCharacters = ['# ', '##', '- ', '* ', '``', '!['];
@@ -122,14 +122,71 @@ export default function Article(props) {
                         currentLineFirstCharacter !== '*' &&
                         currentLineFirstCharacter !== ' ') break //if line doesn't start with - * or white space
                     listLinesCount += 1;
+                }
+                for (var i = 0; i < listLinesCount; i++) { //for all of the lines that are part of the list
                     const listItem = markdown[i];
-                    if (currentLineFirstCharacter === ' ') { //if starts with empty line
-                        createNode('Paragraph', listItem, lastListItemNode); //TODO: find all following lines that start with spaces, calculate the number of spaces of the first line, slice it from all the lines and parse them as another markdown document
+                    if (listItem[0] === ' ') { //if starts with white space
+                        // find all following lines that start with spaces, 
+                        var linesWithSpaces = [];
+                        for (var j = 0; j < listLinesCount; j++) {
+                            try {
+                                const nextLine = markdown[i + j];
+                                if (nextLine[0] !== ' ') break
+                            } catch (error) {
+                                console.error(error)
+                                console.error('error parsing lines with sapces ')
+                                break;
+                            }
+                            linesWithSpaces.push(markdown[i + j])
+                        }
+                        i = i + j - 1; //skip lines with spaces
+                        // calculate the number of spaces of the first line, 
+                        var spacesCount = 0;
+                        for (const key in listItem) { //for each letter in the first line that starts with spaces
+                            if (listItem[key] === ' ') {
+                                spacesCount += 1;
+                            } else {
+                                break;
+                            }
+                        }
+                        // slice it from all the lines and 
+                        linesWithSpaces = linesWithSpaces.map((value) => {
+                            return value.slice(spacesCount);
+                        })
+                        console.log('💥')
+                        console.log(linesWithSpaces)
+                        // parse them as another markdown document
+                        const G = [1, 0,]; //kantenliste
+                        const nD = { 0: 0, };
+                        const nT = { 0: 'root', };
+                        const [childMarkdown, childGraph, childNodeData, childNodeType] = parser(linesWithSpaces, G, nD, nT);
+                        console.log('🎗️')
+                        console.log(childGraph);
+                        console.log(childNodeData);
+                        console.log(childNodeType);
+                        // merge it to the current graph and nodedata and nodetype
+                        const newNodesToMergeCount = childGraph[0] - 1;
+                        function findParentOf(node, graph) {
+                            const LinksArray = graph.slice(2);
+                            for (var index = 1; index < LinksArray.length; index += 2) {
+                                if (LinksArray[index] === node) return LinksArray[index - 1];
+                            }
+                        }
+                        var childNodesMapping = { 0: lastListItemNode };
+                        for (var k = 1; k <= newNodesToMergeCount; k++) {
+                            if (findParentOf(k, childGraph) === 0) { //parent of the node in the child graph is the root of the child graph
+                                const newNode = createNode(childNodeType[k], childNodeData[k], childNodesMapping[0])
+                                childNodesMapping[k] = newNode;
+                            } else {
+                                const parentOfChild = findParentOf(k, childGraph);
+                                const newNode = createNode(childNodeType[k], childNodeData[k], childNodesMapping[parentOfChild])
+                                childNodesMapping[k] = newNode;
+                            }
+                        }
                     } else { //starts with - or *
                         lastListItemNode = createNode('listItem', listItem.slice(2), ulRootNode)
                     }
                 }
-
                 consumeLine(listLinesCount);
             } else if (line.slice(0, 3) === '```') { //code block
                 var codeLinesCount = 0;
