@@ -196,6 +196,9 @@ export default function Article(props) {
                 }
                 createNode('Codeblock', markdown.slice(1, codeLinesCount), rootNode)
                 consumeLine(codeLinesCount + 2);
+            } else {
+                console.error(`Error handling line with spetial characters at line: ${line}`)
+                consumeLine(1);
             }
         }
 
