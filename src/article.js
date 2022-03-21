@@ -37,7 +37,7 @@ export default function Article(props) {
     const nD = { 0: 0, };
     const nT = { 0: 'root', };
 
-    function parser(markdown, graph, nodeData, nodeType) {
+    function parser(markdown, graph, nodeData, nodeType, h) {
         const newlineSpetialCharacters = ['# ', '##', '- ', '* ', '``', '!['];
         function getNodesCount() { return graph[0] };
         function updateNodesLinksCount() {
@@ -78,7 +78,7 @@ export default function Article(props) {
         function handleLineWithSpetialCharacters(line, rootNode) {
             const beforeFirstWhiteSpace = line.split(' ', 1)[0];
             if (!isNaN(beforeFirstWhiteSpace * 1)) { //if its a number, ol
-                console.warn(`${line} is ol`)
+                // console.warn(`${line} is ol`)
                 const olRootNode = createNode('OrderedList', 0, rootNode);
                 var listLinesCount = 0;
                 var lastListItemNode = null;
@@ -99,8 +99,8 @@ export default function Article(props) {
                                 const nextLine = markdown[i + j];
                                 if (nextLine[0] !== ' ') break
                             } catch (error) {
-                                console.error(error)
-                                console.error('error parsing lines with sapces ')
+                                console.warn(error)
+                                console.warn('error parsing lines with sapces ')
                                 break;
                             }
                             linesWithSpaces.push(markdown[i + j])
@@ -119,17 +119,17 @@ export default function Article(props) {
                         linesWithSpaces = linesWithSpaces.map((value) => {
                             return value.slice(spacesCount);
                         })
-                        console.log('💥')
-                        console.log(linesWithSpaces)
+                        // console.log('💥')
+                        // console.log(linesWithSpaces)
                         // parse them as another markdown document
                         const G = [1, 0,]; //kantenliste
                         const nD = { 0: 0, };
                         const nT = { 0: 'root', };
-                        const [childMarkdown, childGraph, childNodeData, childNodeType] = parser(linesWithSpaces, G, nD, nT);
-                        console.log('🎗️')
-                        console.log(childGraph);
-                        console.log(childNodeData);
-                        console.log(childNodeType);
+                        const [childMarkdown, childGraph, childNodeData, childNodeType] = parser(linesWithSpaces, G, nD, nT, h);
+                        // console.log('🎗️')
+                        // console.log(childGraph);
+                        // console.log(childNodeData);
+                        // console.log(childNodeType);
                         // merge it to the current graph and nodedata and nodetype
                         const newNodesToMergeCount = childGraph[0] - 1;
                         function findParentOf(node, graph) {
@@ -188,7 +188,7 @@ export default function Article(props) {
                 }
                 consumeLine(1);
             } else if (beforeFirstWhiteSpace === '-' || beforeFirstWhiteSpace === '*') { //ul
-                console.warn(line + ' is ul');
+                //console.warn(line + ' is ul');
                 const ulRootNode = createNode('UnorderedList', 0, rootNode);
                 var listLinesCount = 0;
                 var lastListItemNode = null;
@@ -209,8 +209,8 @@ export default function Article(props) {
                                 const nextLine = markdown[i + j];
                                 if (nextLine[0] !== ' ') break
                             } catch (error) {
-                                console.error(error)
-                                console.error('error parsing lines with sapces ')
+                                console.warn(error)
+                                console.warn('error parsing lines with sapces ')
                                 break;
                             }
                             linesWithSpaces.push(markdown[i + j])
@@ -229,17 +229,17 @@ export default function Article(props) {
                         linesWithSpaces = linesWithSpaces.map((value) => {
                             return value.slice(spacesCount);
                         })
-                        console.log('💥')
-                        console.log(linesWithSpaces)
+                        //console.log('💥')
+                        //console.log(linesWithSpaces)
                         // parse them as another markdown document
                         const G = [1, 0,]; //kantenliste
                         const nD = { 0: 0, };
                         const nT = { 0: 'root', };
-                        const [childMarkdown, childGraph, childNodeData, childNodeType] = parser(linesWithSpaces, G, nD, nT);
-                        console.log('🎗️')
-                        console.log(childGraph);
-                        console.log(childNodeData);
-                        console.log(childNodeType);
+                        const [childMarkdown, childGraph, childNodeData, childNodeType] = parser(linesWithSpaces, G, nD, nT, h);
+                        // console.log('🎗️')
+                        // console.log(childGraph);
+                        // console.log(childNodeData);
+                        // console.log(childNodeType);
                         // merge it to the current graph and nodedata and nodetype
                         const newNodesToMergeCount = childGraph[0] - 1;
                         function findParentOf(node, graph) {
@@ -300,41 +300,84 @@ export default function Article(props) {
             const firstTwoCharacters = line.slice(0, 2);
             if (newlineSpetialCharacters.includes(firstTwoCharacters) || (!isNaN(firstTwoCharacters * 1) && firstTwoCharacters !== '  ')) {
                 handleLineWithSpetialCharacters(line, rootNode)
-                console.log('spetial chars: ' + line)
+                // console.log('spetial chars: ' + line)
             } else {
                 createNode('Paragraph', line, rootNode);
                 consumeLine(1);
             };
         }
 
+        function copyObject(input) {
+            let output = {}; 
+            let key;
+            for (key in input) {
+                output[key] = input[key]; 
+            }
+            return output;
+        }
+
+        function copyArray(input) {
+            let output = []; 
+            let key;
+            for (key in input) {
+                output[key] = input[key];
+            }
+            return output;
+        }
+
         var lineCount = 0
         while (markdown.length > 0) { //process until there's no more lines
-            console.log('🟡 Progress:');
-            console.log(`line:${lineCount}`);
-            console.log(`line:${markdown[0]}`)
-            console.log(markdown);
-            console.log(graph);
-            console.log(nodeData);
-            console.log(nodeType);
+            // console.log('🟡 Progress:');
+            // console.log(`line:${lineCount}`);
+            // console.log(`line:${markdown[0]}`)
+            // console.log(markdown);
+            // console.log(graph);
+            // console.log(nodeData);
+            // console.log(nodeType);
+            h[h.counter] = {
+                md: markdown,
+                currLine: markdown[0],
+                g: copyArray(graph),
+                nData: copyObject(nodeData),
+                nType: copyObject(nodeType),
+            };
+            h.counter += 1;
             processLine(markdown[0], 0);
             lineCount += 1;
         }
 
-        return [markdown, graph, nodeData, nodeType]
+        return [markdown, graph, nodeData, nodeType, h]
     }
 
-    const [mdsrc, tree, treeContents, treeTags] = parser(data.replaceAll('\t', '         ').split('\n'), G, nD, nT); //replace all tabs with 9 spaces and create and array wheren each item is a line of the markdown document
+    const [mdsrc, tree, treeContents, treeTags, histry] = parser(data.replaceAll('\t', '         ').split('\n'), G, nD, nT, { counter: 0, }); //replace all tabs with 9 spaces and create and array wheren each item is a line of the markdown document
     console.log('🟢 Results:');
     console.log(mdsrc);
     console.log(tree);
     console.log(treeContents);
     console.log(treeTags);
+    console.log('🟡 Results:');
+    console.log(histry)
+
+    function renderArticle(graph, nodeData, nodeType) {
+        var res = [];
+        for (const key in graph) {
+            res.push(<Text key={key} text={graph[key]}></Text>);
+        }
+        return res
+    }
 
     return (
         <article className={style.article}>
             <Title text={props.article}></Title>
 
-            <Paragraph content={data} />
+            <H2 text='Treecontents:'></H2>
+            <Paragraph content={JSON.stringify(treeContents)} />
+            <H2 text='treeTags:'></H2>
+            <Paragraph content={JSON.stringify(treeTags)} />
+            <H2 text='tree:'></H2>
+            <Paragraph content={JSON.stringify(tree)} />
+
+            {renderArticle(tree, treeContents, treeTags)}
         </article>
     );
 }
