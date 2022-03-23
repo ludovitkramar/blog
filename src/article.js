@@ -308,16 +308,16 @@ export default function Article(props) {
         }
 
         function copyObject(input) {
-            let output = {}; 
+            let output = {};
             let key;
             for (key in input) {
-                output[key] = input[key]; 
+                output[key] = input[key];
             }
             return output;
         }
 
         function copyArray(input) {
-            let output = []; 
+            let output = [];
             let key;
             for (key in input) {
                 output[key] = input[key];
@@ -349,7 +349,7 @@ export default function Article(props) {
         return [markdown, graph, nodeData, nodeType, h]
     }
 
-    const [mdsrc, tree, treeContents, treeTags, histry] = parser(data.replaceAll('\t', '         ').split('\n'), G, nD, nT, { counter: 0, }); //replace all tabs with 9 spaces and create and array wheren each item is a line of the markdown document
+    const [mdsrc, tree, treeContents, treeTags, histry] = parser(data.replaceAll('\t', ' ').split('\n'), G, nD, nT, { counter: 0, }); //replace all tabs with 9 spaces and create and array wheren each item is a line of the markdown document
     console.log('🟢 Results:');
     console.log(mdsrc);
     console.log(tree);
@@ -358,26 +358,69 @@ export default function Article(props) {
     console.log('🟡 Results:');
     console.log(histry)
 
-    function renderArticle(graph, nodeData, nodeType) {
-        var res = [];
-        for (const key in graph) {
-            res.push(<Text key={key} text={graph[key]}></Text>);
+    function renderArticle(graph, nodeData, nodeType, root) {
+        // var res = [];
+        // for (const key in graph) {
+        //     res.push(<Text key={key} text={graph[key]}></Text>);
+        // }
+        // return res
+
+        //create array nodes of every node connected to root
+        var links = graph.slice(2);
+        var nodes = [];
+        for (var i = 1; i < links.length; i += 2) {
+            if (links[i - 1] === root) nodes.push(links[i])
         }
-        return res
+        console.log(nodes)
+
+        //
+        const code = nodes.map((value) => { //value is the node number
+            switch (nodeType[value]) {
+                case 'Title':
+                    return <Title key={value} text={nodeData[value]}></Title>
+
+                case 'Paragraph':
+                    return <Paragraph key={value} content={nodeData[value]}></Paragraph>
+
+                case 'listItem':
+                    return <ListItem key={value} text={[nodeData[value], renderArticle(graph, nodeData, nodeType, value)]}></ListItem>
+                    // console.log('ignored listItem')
+                    // break;
+
+                case 'UnorderedList':
+                    return <UnorderedList key={value} list={renderArticle(graph, nodeData, nodeType, value)}></UnorderedList>
+
+                case 'OrderedList':
+                    return <OrderedList key={value} list={renderArticle(graph, nodeData, nodeType, value)}></OrderedList>
+
+                case 'Codeblock':
+                    return <Codeblock key={value} code={nodeData[value]}></Codeblock>
+
+                case 'Image':
+                    return <Image key={value} src={nodeData[value].src} alt={nodeData[value].alt} title={nodeData[value].title}></Image>
+
+                case 'H2':
+                    return <H2 key={value} text={nodeData[value]}></H2>
+
+                case 'H3':
+                    return <H3 key={value} text={nodeData[value]}></H3>
+
+                case 'H4':
+                    return <H4 key={value} text={nodeData[value]}></H4>
+
+                default:
+                    console.error(`Unknown data type: ${nodeType[value]}`)
+                    return <Text key={value} text={nodeData[value]}></Text>
+                    break;
+            }
+        })
+
+        return code;
     }
 
     return (
         <article className={style.article}>
-            <Title text={props.article}></Title>
-
-            <H2 text='Treecontents:'></H2>
-            <Paragraph content={JSON.stringify(treeContents)} />
-            <H2 text='treeTags:'></H2>
-            <Paragraph content={JSON.stringify(treeTags)} />
-            <H2 text='tree:'></H2>
-            <Paragraph content={JSON.stringify(tree)} />
-
-            {renderArticle(tree, treeContents, treeTags)}
+            {renderArticle(tree, treeContents, treeTags, 0)}
         </article>
     );
 }
@@ -407,43 +450,23 @@ function H4(props) {
 }
 
 function OrderedList(props) {
-    // props.list is the array of the list items
-    function generateList(list) {
-        const code = list.map((element, index) => {
-            return (
-                <li className={style.li} key={index}>
-                    {element}
-                </li>
-            )
-        });
-        return code;
-    }
-
     return (
         <ol className={style.ol}>
-            {generateList(props.list)}
+            {props.list}
         </ol>
     );
 }
 
 function UnorderedList(props) {
-    // props.list is the array of the list items
-    function generateList(list) {
-        const code = list.map((element, index) => {
-            return (
-                <li className={style.li} key={index}>
-                    {element}
-                </li>
-            )
-        });
-        return code;
-    }
-
     return (
         <ul className={style.ul}>
-            {generateList(props.list)}
+            {props.list}
         </ul>
     );
+}
+
+function ListItem(props) {
+    return <li className={style.li}>{props.text}</li>
 }
 
 function Paragraph(props) {
@@ -482,6 +505,6 @@ function Codeblock(props) {
 
 function Image(props) {
     return (
-        <img src={props.src} alt={props.alt} title={props.title} className={style.img}></img>
+        <img src={`${settings.mediaURL}/${props.src}`} alt={props.alt} title={props.title} className={style.img}></img>
     )
 }
