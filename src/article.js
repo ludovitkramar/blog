@@ -271,7 +271,7 @@ export default function Article(props) {
                     codeLinesCount += 1;
                 }
                 createNode('Codeblock', markdown.slice(1, codeLinesCount), rootNode)
-                consumeLine(codeLinesCount + 2);
+                consumeLine(codeLinesCount + 1);
             } else {
                 console.error(`Error handling line with spetial characters at line: ${line}`)
                 consumeLine(1);
@@ -384,8 +384,8 @@ export default function Article(props) {
 
                 case 'listItem':
                     return <ListItem key={value} text={[nodeData[value], renderArticle(graph, nodeData, nodeType, value)]}></ListItem>
-                    // console.log('ignored listItem')
-                    // break;
+                // console.log('ignored listItem')
+                // break;
 
                 case 'UnorderedList':
                     return <UnorderedList key={value} list={renderArticle(graph, nodeData, nodeType, value)}></UnorderedList>
@@ -407,6 +407,12 @@ export default function Article(props) {
 
                 case 'H4':
                     return <H4 key={value} text={nodeData[value]}></H4>
+
+                case 'Small':
+                    return <Small key={value} text={nodeData[value]} />
+
+                case 'Code':
+                    return <Code key={value} code={nodeData[value]} />
 
                 default:
                     console.error(`Unknown data type: ${nodeType[value]}`)
