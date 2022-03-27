@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import style from './article.module.css';
 import { Link } from "react-router-dom";
 import settings from "./settings";
+import GraphViewer from "./graphViewer";
 
 export default function Article(props) {
     const [data, setData] = useState([]);
@@ -427,6 +428,8 @@ export default function Article(props) {
     return (
         <article className={style.article}>
             {renderArticle(tree, treeContents, treeTags, 0)}
+
+            <GraphViewer graph={tree} nodesData={treeContents} nodesType={treeTags} />
         </article>
     );
 }
