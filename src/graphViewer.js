@@ -49,6 +49,20 @@ export default function GraphViewer(props) {
 
     console.log(calcularEcuacionDeDosIncognitas([-11, 9, 4, -11, 100, 4]));
 
+    // perform BFS algorithm and create the links 
+
+    // the root node is at (0, 0)
+    // when creating links, the line cannot cross with any other line, 
+    // except if: the point of intersection is the parent node's point && the other line has the same parent
+    // each link is name with a string "0/1" means link from 0 to 1, "/" is necessary to distinguish between "11/1" and "1/11"
+    // the links are stored in the object named "links"
+
+    // after all links are created, the points (nodes) will have reverse gravitation and friction that separates one
+    // from another and eventually stops them, the links act like spring, so that the points cannot drift too far away
+    // a function calculates the forces on every point and moves the one time step, it'll need to be repeated periodically untils movement stops.
+
+
+
     return (
         <div className={style.container} >
             <Node node="1" type="article" data="nodeData" />
@@ -61,8 +75,8 @@ function Node(props) {
     return (
         <div className={style.node}>
             <span>{props.node}</span>
-            <div className={style.nodedata}>
-                <span>{props.type}</span>
+            <div className={style.nodedata} style={{'--nodeID': `"${props.node}"`,}}>
+                <span className={style.nodeTitle}>{props.type}</span>
                 <br />
                 <span>{props.data}</span>
             </div>
