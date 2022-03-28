@@ -25,6 +25,10 @@
     user-select: none;
 }
 
+.node:hover {
+    z-index: 103;
+}
+
 .nodedata {
     --nodeID: "ID";
     display: none;

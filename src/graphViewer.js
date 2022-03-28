@@ -2,6 +2,9 @@ import { useState, useEffect } from "react";
 import style from './graphViewer.module.css'
 
 export default function GraphViewer(props) {
+    const [zoom, setZoom] = useState(100);
+    const [xOffset, setxOffset] = useState(200);
+    const [yOffset, setyOffset] = useState(200);
     const G = props.graph;
     const nData = props.nodesData;
     const nType = props.nodesType;
@@ -33,7 +36,7 @@ export default function GraphViewer(props) {
     function calcularEcuacionDeDosIncognitas(matrix) {
         const matriz = escalera(matrix)
         console.log(matriz);
-        if (!isMatrixValid(matriz)) throw('Invalid matrix, can\'t solve');
+        if (!isMatrixValid(matriz)) throw ('Invalid matrix, can\'t solve');
         var x = 0;
         var y = 0;
         if (matriz[5] === 0 && matriz[4] === 0) return [Infinity, Infinity] //infinitas soluciones
@@ -47,10 +50,64 @@ export default function GraphViewer(props) {
         return [x, y]
     }
 
+    function getChildsOf(graph, root) {
+        var links = graph.slice(2);
+        var nodes = [];
+        for (var i = 1; i < links.length; i += 2) {
+            if (links[i - 1] === root) nodes.push(links[i])
+        }
+        return nodes
+    }
+
     console.log(calcularEcuacionDeDosIncognitas([-11, 9, 4, -11, 100, 4]));
 
-    // perform BFS algorithm and create the links 
+    function findParentOf(node, graph) {
+        const LinksArray = graph.slice(2);
+        for (var index = 1; index < LinksArray.length; index += 2) {
+            if (LinksArray[index] === node) return LinksArray[index - 1];
+        }
+    }
 
+    function generatePointsFromGraph(graph) {
+        const nodesCount = graph[0]
+        const linksCount = graph[1]
+        const links = graph.slice(2);
+        const distance = 2;
+        var pointsArray = [[0, 0],]; //node 0 (index 0) is on the origin
+        var BFSqueue = [0] //start the search from node 0
+        var angle = 0;
+        while (BFSqueue.length > 0) {
+            const currentNode = BFSqueue[0] // the first item on the queue is the current node
+            const currentPoint = pointsArray[currentNode] //get the point from which we'll create the new links (vectors)
+            const neighbors = getChildsOf(G, currentNode);
+            neighbors.forEach(element => {
+                if (!BFSqueue.includes(element)) { //if the queue doesn't have that element
+                    BFSqueue.push(element);
+                    pointsArray[element] = [distance * Math.cos(angle), distance * Math.sin(angle)]
+                    //TODO: check collision
+                    angle += .1;
+                }
+            });
+            BFSqueue = BFSqueue.slice(1) //remove the fist item from the queue
+        }
+        return pointsArray
+    }
+
+    function handleScroll(event) {
+        console.log(event.deltaY)
+        setZoom(zoom - event.deltaY * 0.5)
+    }
+
+    function handleDrag(e) {
+        // console.log(e);
+        if (e.buttons > 0) {
+            setxOffset(xOffset + e.movementX)
+            setyOffset(yOffset + e.movementY)
+        }
+    }
+
+    // perform BFS algorithm and create the links 
+    console.log(points = generatePointsFromGraph(G))
     // the root node is at (0, 0)
     // when creating links, the line cannot cross with any other line, 
     // except if: the point of intersection is the parent node's point && the other line has the same parent
@@ -62,20 +119,48 @@ export default function GraphViewer(props) {
     // a function calculates the forces on every point and moves the one time step, it'll need to be repeated periodically untils movement stops.
 
 
+    var reactCode = [];
+    points.forEach((point, node, points) => {
+        const pointX = point[0] * zoom + xOffset;
+        const pointY = point[1] * zoom + yOffset;
+        console.log(pointY);
+        reactCode.push(
+            <Node key={node + "n"} node={node} type={nType[node]} data={nData[node]} top={pointX} left={pointY} />
+        )
+        try {
+            const parentNode = findParentOf(node, G);
+            const linkX1 = points[parentNode][0] * zoom + xOffset;
+            const linkY1 = points[parentNode][1] * zoom + yOffset;
+            const length = Math.sqrt((pointX - linkX1) ** 2 + (pointY - linkY1) ** 2)
+            const angle = Math.acos((pointX - linkX1) / length)
+            console.log(angle)
+            reactCode.push(
+                <Link key={node + "l"} width={length} top={linkX1 + 25} left={linkY1 + 25} rotate={angle}></Link>
+            )
+        } catch (error) {
+            console.error(error)
+        }
+
+    })
 
     return (
-        <div className={style.container} >
-            <Node node="1" type="article" data="nodeData" />
-            <Link width="200" top="20" left="50" rotate="40"></Link>
+        <div className={style.container} onWheel={handleScroll} onMouseMove={handleDrag}>
+            {/* <Node node="1" type="article" data="nodeData" top="40" left="100" />
+            <Link width="200" top="20" left="50" rotate="40"></Link> */}
+            {reactCode}
         </div>
     )
 }
 
 function Node(props) {
+    const nodeStyle = {
+        top: props.top + 'px',
+        left: `${props.left}px`,
+    }
     return (
-        <div className={style.node}>
+        <div className={style.node} style={nodeStyle}>
             <span>{props.node}</span>
-            <div className={style.nodedata} style={{'--nodeID': `"${props.node}"`,}}>
+            <div className={style.nodedata} style={{ '--nodeID': `"${props.node}"`, }}>
                 <span className={style.nodeTitle}>{props.type}</span>
                 <br />
                 <span>{props.data}</span>
