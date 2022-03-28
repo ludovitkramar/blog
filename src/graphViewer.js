@@ -107,7 +107,9 @@ export default function GraphViewer(props) {
     }
 
     // perform BFS algorithm and create the links 
-    console.log(points = generatePointsFromGraph(G))
+    points = generatePointsFromGraph(G);
+
+    console.log(points)
     // the root node is at (0, 0)
     // when creating links, the line cannot cross with any other line, 
     // except if: the point of intersection is the parent node's point && the other line has the same parent
@@ -119,29 +121,40 @@ export default function GraphViewer(props) {
     // a function calculates the forces on every point and moves the one time step, it'll need to be repeated periodically untils movement stops.
 
 
-    var reactCode = [];
-    points.forEach((point, node, points) => {
-        const pointX = point[0] * zoom + xOffset;
-        const pointY = point[1] * zoom + yOffset;
-        console.log(pointY);
-        reactCode.push(
-            <Node key={node + "n"} node={node} type={nType[node]} data={nData[node]} top={pointX} left={pointY} />
-        )
-        try {
-            const parentNode = findParentOf(node, G);
-            const linkX1 = points[parentNode][0] * zoom + xOffset;
-            const linkY1 = points[parentNode][1] * zoom + yOffset;
-            const length = Math.sqrt((pointX - linkX1) ** 2 + (pointY - linkY1) ** 2)
-            const angle = Math.acos((pointX - linkX1) / length)
-            console.log(angle)
-            reactCode.push(
-                <Link key={node + "l"} width={length} top={linkX1 + 25} left={linkY1 + 25} rotate={angle}></Link>
-            )
-        } catch (error) {
-            console.error(error)
-        }
 
-    })
+    function generateReactCode() {
+        var reactCode = [];
+        points.forEach((point, node, points) => {
+            const pointX = point[0] * zoom + xOffset;
+            const pointY = point[1] * zoom + yOffset;
+            console.log(pointY);
+            reactCode.push(
+                <Node key={node + "n"} node={node} type={nType[node]} data={nData[node]} top={pointX} left={pointY} />
+            )
+            try {
+                const parentNode = findParentOf(node, G);
+                console.log(parentNode + ' is the parent');
+                const linkX1 = points[parentNode][0] * zoom + xOffset;
+                const linkY1 = points[parentNode][1] * zoom + yOffset;
+                console.log(`point of parent is: ${linkX1}, ${linkY1}`);
+                const length = Math.sqrt((pointX - linkX1) ** 2 + (pointY - linkY1) ** 2)
+                const angle = Math.acos((pointX - linkX1) / length)
+                console.log('length');
+                console.log(length)
+                console.log('angle');
+                console.log(angle)
+                reactCode.push(
+                    <Link key={node + "l"} width={length} top={linkX1} left={linkY1} rotate={angle / Math.PI * 180}></Link>
+                )
+            } catch (error) {
+                console.error(error)
+            }
+
+        })
+        return reactCode;
+    }
+
+    const reactCode = generateReactCode()
 
     return (
         <div className={style.container} onWheel={handleScroll} onMouseMove={handleDrag}>
