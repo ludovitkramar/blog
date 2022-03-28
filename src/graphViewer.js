@@ -5,14 +5,53 @@ export default function GraphViewer(props) {
     const G = props.graph;
     const nData = props.nodesData;
     const nType = props.nodesType;
-    
-    var points = [];
-    
 
+    var points = [];
+
+    function escalera(matrix) { //six numbers in array
+        if (matrix[3] === 0) return matrix
+        if (matrix[0] === 0) return matrix.slice(3).concat(matrix.slice(0, 3)) //switch the first and second line
+        const needsSubtracted = 0 - matrix[3];
+        const mustBeMultipliedBy = needsSubtracted / matrix[0];
+        const resultMatrix = matrix.map((value, index, array) => {
+            if (index > 2) return (value + array[index - 3] * mustBeMultipliedBy)
+            return value
+        })
+        return resultMatrix;
+    }
+
+    function isMatrixValid(matrix) {
+        for (const key in matrix) {
+            if (isNaN(matrix[key])) return false
+        }
+        if (matrix[0] === 0 && matrix[1] === 0) return false
+        if (matrix[0] === 0 && matrix[3] === 0) return false
+        if (matrix[1] === 0 && matrix[4] === 0) return false
+        return true
+    }
+
+    function calcularEcuacionDeDosIncognitas(matrix) {
+        const matriz = escalera(matrix)
+        console.log(matriz);
+        if (!isMatrixValid(matriz)) throw('Invalid matrix, can\'t solve');
+        var x = 0;
+        var y = 0;
+        if (matriz[5] === 0 && matriz[4] === 0) return [Infinity, Infinity] //infinitas soluciones
+        if (matriz[4] === 0 && matriz[3] === 0) return [null, null] //paralela
+        if (matriz[5] === 0) {
+            y = 0
+        } else {
+            y = matriz[5] / matriz[4]
+        }
+        x = (matriz[2] - (y * matriz[1])) / matriz[0]
+        return [x, y]
+    }
+
+    console.log(calcularEcuacionDeDosIncognitas([-11, 9, 4, -11, 100, 4]));
 
     return (
         <div className={style.container} >
-            <Node node="1" type="article" data="nodeData"/>
+            <Node node="1" type="article" data="nodeData" />
             <Link width="200" top="20" left="50" rotate="40"></Link>
         </div>
     )
