@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import style from './graphViewer.module.css'
 
 export default function GraphViewer(props) {
@@ -101,9 +101,14 @@ export default function GraphViewer(props) {
     function handleDrag(e) {
         // console.log(e);
         if (e.buttons > 0) {
-            setxOffset(xOffset + e.movementX)
-            setyOffset(yOffset + e.movementY)
+            setxOffset(xOffset + e.movementY)
+            setyOffset(yOffset + e.movementX)
         }
+    }
+
+    function handleZoom(e) {
+        console.log(e.target.value)
+        setZoom(e.target.value * 3)
     }
 
     // perform BFS algorithm and create the links 
@@ -157,10 +162,13 @@ export default function GraphViewer(props) {
     const reactCode = generateReactCode()
 
     return (
-        <div className={style.container} onWheel={handleScroll} onMouseMove={handleDrag}>
-            {/* <Node node="1" type="article" data="nodeData" top="40" left="100" />
-            <Link width="200" top="20" left="50" rotate="40"></Link> */}
-            {reactCode}
+        <div className={style.container}>
+            <input className={style.range} type="range" onChange={handleZoom} min="2" max="200" step=".1"></input>
+            <div onMouseMove={handleDrag} className={style.container2}>
+                {/* <Node node="1" type="article" data="nodeData" top="40" left="100" />
+                <Link width="200" top="20" left="50" rotate="40"></Link> */}
+                {reactCode}
+            </div>
         </div>
     )
 }
@@ -176,7 +184,7 @@ function Node(props) {
             <div className={style.nodedata} style={{ '--nodeID': `"${props.node}"`, }}>
                 <span className={style.nodeTitle}>{props.type}</span>
                 <br />
-                <span>{props.data}</span>
+                <p className={style.nData}>{props.data}</p>
             </div>
         </div>
     )
