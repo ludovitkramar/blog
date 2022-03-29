@@ -73,7 +73,7 @@ export default function GraphViewer(props) {
         const nodesCount = graph[0]
         const linksCount = graph[1]
         const links = graph.slice(2);
-        const distance = 2;
+        const distance = .5;
         var pointsArray = [[0, 0],]; //node 0 (index 0) is on the origin
         var BFSqueue = [0] //start the search from node 0
         var angle = 0;
@@ -84,7 +84,9 @@ export default function GraphViewer(props) {
             neighbors.forEach(element => {
                 if (!BFSqueue.includes(element)) { //if the queue doesn't have that element
                     BFSqueue.push(element);
-                    pointsArray[element] = [distance * Math.cos(angle), distance * Math.sin(angle)]
+                    const newX = currentPoint[0] + distance * Math.cos(angle);
+                    const newY = currentPoint[1] + distance * Math.sin(angle);
+                    pointsArray[element] = [newX, newY]
                     //TODO: check collision
                     angle += .1;
                 }
@@ -122,22 +124,24 @@ export default function GraphViewer(props) {
                 <Node key={node + "n"} node={node} type={nType[node]} data={nData[node]} top={pointX} left={pointY} />
             )
             try {
-                const parentNode = findParentOf(node, G);
-                //console.log(parentNode + ' is the parent');
-                const linkX1 = points[parentNode][0] * zoom + xOffset;
-                const linkY1 = points[parentNode][1] * zoom + yOffset;
-                //console.log(`point of parent is: ${linkX1}, ${linkY1}`);
-                const length = Math.sqrt((pointX - linkX1) ** 2 + (pointY - linkY1) ** 2)
-                const angle = Math.acos((pointX - linkX1) / length)
-                //console.log('length');
-                //console.log(length)
-                //console.log('angle');
-                //console.log(angle)
-                reactCode.push(
-                    <Link key={node + "l"} width={length} top={linkX1} left={linkY1} rotate={angle / Math.PI * 180}></Link>
-                )
+                if (node !== 0) {
+                    const parentNode = findParentOf(node, G);
+                    const linkX1 = points[parentNode][0] * zoom + xOffset + 25;
+                    const linkY1 = points[parentNode][1] * zoom + yOffset + 25;
+                    const linkX2 = pointX + 25;
+                    const linkY2 = pointY + 25;
+                    const length = Math.sqrt((linkX2 - linkX1) ** 2 + (linkY2 - linkY1) ** 2)
+                    const angle = Math.acos((linkY2 - linkY1) / length)
+                    var angleInDeg = (angle / Math.PI * 180);
+                    if (linkX2 - linkX1 < 0) angleInDeg = -(angle / Math.PI * 180)
+                    // console.log(`[${parentNode},${node}] Angle in rad: ${angle}; angle in deg: ${angleInDeg}`)
+                    reactCode.push(
+                        <Link key={node + "l"} width={length} top={linkX1} left={linkY1} rotate={angleInDeg}></Link>
+                    )
+                }
             } catch (error) {
-                //console.error(error)
+                // console.error(error)
+                console.warn(`Node: "${node}" is an orphan.`)
             }
 
         })
@@ -163,10 +167,11 @@ export default function GraphViewer(props) {
             // after all links are created, the points (nodes) will have reverse gravitation and friction that separates one
             // from another and eventually stops them, the links act like spring, so that the points cannot drift too far away
             // a function calculates the forces on every point and moves the one time step, it'll need to be repeated periodically untils movement stops.
-            
+
             loaded.current = true;
         }
     }, [G, generatePointsFromGraph, points])
+
 
     const reactCode = generateReactCode(points)
 
