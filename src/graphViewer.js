@@ -5,11 +5,12 @@ export default function GraphViewer(props) {
     const [zoom, setZoom] = useState(100);
     const [xOffset, setxOffset] = useState(200);
     const [yOffset, setyOffset] = useState(200);
+    const [points, setPoints] = useState([]);
+    const loaded = useRef(false);
+
     const G = props.graph;
     const nData = props.nodesData;
     const nType = props.nodesType;
-
-    var points = [];
 
     function escalera(matrix) { //six numbers in array
         if (matrix[3] === 0) return matrix
@@ -35,7 +36,7 @@ export default function GraphViewer(props) {
 
     function calcularEcuacionDeDosIncognitas(matrix) {
         const matriz = escalera(matrix)
-        console.log(matriz);
+        //console.log(matriz);
         if (!isMatrixValid(matriz)) throw ('Invalid matrix, can\'t solve');
         var x = 0;
         var y = 0;
@@ -59,7 +60,7 @@ export default function GraphViewer(props) {
         return nodes
     }
 
-    console.log(calcularEcuacionDeDosIncognitas([-11, 9, 4, -11, 100, 4]));
+    //console.log(calcularEcuacionDeDosIncognitas([-11, 9, 4, -11, 100, 4]));
 
     function findParentOf(node, graph) {
         const LinksArray = graph.slice(2);
@@ -79,7 +80,7 @@ export default function GraphViewer(props) {
         while (BFSqueue.length > 0) {
             const currentNode = BFSqueue[0] // the first item on the queue is the current node
             const currentPoint = pointsArray[currentNode] //get the point from which we'll create the new links (vectors)
-            const neighbors = getChildsOf(G, currentNode);
+            const neighbors = getChildsOf(graph, currentNode);
             neighbors.forEach(element => {
                 if (!BFSqueue.includes(element)) { //if the queue doesn't have that element
                     BFSqueue.push(element);
@@ -107,59 +108,67 @@ export default function GraphViewer(props) {
     }
 
     function handleZoom(e) {
-        console.log(e.target.value)
+        //console.log(e.target.value)
         setZoom(e.target.value * 3)
     }
 
-    // perform BFS algorithm and create the links 
-    points = generatePointsFromGraph(G);
-
-    console.log(points)
-    // the root node is at (0, 0)
-    // when creating links, the line cannot cross with any other line, 
-    // except if: the point of intersection is the parent node's point && the other line has the same parent
-    // each link is name with a string "0/1" means link from 0 to 1, "/" is necessary to distinguish between "11/1" and "1/11"
-    // the links are stored in the object named "links"
-
-    // after all links are created, the points (nodes) will have reverse gravitation and friction that separates one
-    // from another and eventually stops them, the links act like spring, so that the points cannot drift too far away
-    // a function calculates the forces on every point and moves the one time step, it'll need to be repeated periodically untils movement stops.
-
-
-
-    function generateReactCode() {
+    function generateReactCode(points) {
         var reactCode = [];
         points.forEach((point, node, points) => {
             const pointX = point[0] * zoom + xOffset;
             const pointY = point[1] * zoom + yOffset;
-            console.log(pointY);
+            //console.log(pointY);
             reactCode.push(
                 <Node key={node + "n"} node={node} type={nType[node]} data={nData[node]} top={pointX} left={pointY} />
             )
             try {
                 const parentNode = findParentOf(node, G);
-                console.log(parentNode + ' is the parent');
+                //console.log(parentNode + ' is the parent');
                 const linkX1 = points[parentNode][0] * zoom + xOffset;
                 const linkY1 = points[parentNode][1] * zoom + yOffset;
-                console.log(`point of parent is: ${linkX1}, ${linkY1}`);
+                //console.log(`point of parent is: ${linkX1}, ${linkY1}`);
                 const length = Math.sqrt((pointX - linkX1) ** 2 + (pointY - linkY1) ** 2)
                 const angle = Math.acos((pointX - linkX1) / length)
-                console.log('length');
-                console.log(length)
-                console.log('angle');
-                console.log(angle)
+                //console.log('length');
+                //console.log(length)
+                //console.log('angle');
+                //console.log(angle)
                 reactCode.push(
                     <Link key={node + "l"} width={length} top={linkX1} left={linkY1} rotate={angle / Math.PI * 180}></Link>
                 )
             } catch (error) {
-                console.error(error)
+                //console.error(error)
             }
 
         })
         return reactCode;
     }
 
-    const reactCode = generateReactCode()
+    useEffect(() => {
+        if (!loaded.current) {
+            const generatedPoints = generatePointsFromGraph(G);
+            setPoints(generatedPoints);
+
+            console.log(generatedPoints)
+            console.log(points);
+
+            // perform BFS algorithm and create the links 
+
+            // the root node is at (0, 0)
+            // when creating links, the line cannot cross with any other line, 
+            // except if: the point of intersection is the parent node's point && the other line has the same parent
+            // each link is name with a string "0/1" means link from 0 to 1, "/" is necessary to distinguish between "11/1" and "1/11"
+            // the links are stored in the object named "links"
+
+            // after all links are created, the points (nodes) will have reverse gravitation and friction that separates one
+            // from another and eventually stops them, the links act like spring, so that the points cannot drift too far away
+            // a function calculates the forces on every point and moves the one time step, it'll need to be repeated periodically untils movement stops.
+            
+            loaded.current = true;
+        }
+    }, [G, generatePointsFromGraph, points])
+
+    const reactCode = generateReactCode(points)
 
     return (
         <div className={style.container}>
