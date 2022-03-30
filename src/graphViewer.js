@@ -6,6 +6,8 @@ export default function GraphViewer(props) {
     const [xOffset, setxOffset] = useState(200);
     const [yOffset, setyOffset] = useState(200);
     const [points, setPoints] = useState([]);
+    const [graphLength, setGraphLength] = useState(0);
+    const [samples, setSamples] = useState([]);
     const loaded = useRef(false);
 
     const G = props.graph;
@@ -96,6 +98,46 @@ export default function GraphViewer(props) {
         return pointsArray
     }
 
+    function graphChanged(graph, nd) { //graph is a kantenliste, an array of number
+        // takes a sample of six random nodes (and their data) and the array length
+        // return true if they have changed
+        // samples = [] first is the node, second is the nodedata
+        const samplesCount = 6
+
+        // console.log(`Recorded graph length = ${graphLength}, computed graph length = ${graph.length}`)
+        // console.log(`Current sample are: `)
+        // console.log(samples)
+
+        if (graphLength !== graph.length) {
+            updateSamples()
+            //console.log('did change length');
+            return true
+        }
+        for (var i = 0; i < samplesCount; i++) {
+            const currentNode = samples[i][0];
+            //console.log(samples[i][1])
+            //console.log(nd[currentNode])
+            if (samples[i][1] !== nd[currentNode]) {
+                //console.log('did change content');
+                updateSamples()
+                return true
+            }
+        }
+        function updateSamples() {
+            const nodesCount = graph[0]
+            var tmp = [];
+            setGraphLength(graph.length);
+            for (var index = 0; index < samplesCount; index++) {
+                const rndNode = Math.round((Math.random() * nodesCount) - 1)
+                tmp[index] = [rndNode, nd[rndNode]]
+            }
+            setSamples(tmp)
+            // console.log(tmp)
+        }
+        //console.log('did not change');
+        return false
+    }
+
     function handleScroll(event) {
         console.log(event.deltaY)
         setZoom(zoom - event.deltaY * 0.5)
@@ -149,6 +191,9 @@ export default function GraphViewer(props) {
     }
 
     useEffect(() => {
+        if (graphChanged(G, nData)) {
+            loaded.current = false;
+        }
         if (!loaded.current) {
             const generatedPoints = generatePointsFromGraph(G);
             setPoints(generatedPoints);
