@@ -237,13 +237,20 @@ function Node(props) {
         top: props.top + 'px',
         left: `${props.left}px`,
     }
+    function data() {
+        if (typeof(props.data === 'object')) {
+            return JSON.stringify(props.data)
+        } else {
+            return props.data
+        }
+    }
     return (
         <div className={style.node} style={nodeStyle}>
             <span>{props.node}</span>
             <div className={style.nodedata} style={{ '--nodeID': `"${props.node}"`, }}>
                 <span className={style.nodeTitle}>{props.type}</span>
                 <br />
-                <p className={style.nData}>{props.data}</p>
+                <p className={style.nData}>{data()}</p>
             </div>
         </div>
     )
