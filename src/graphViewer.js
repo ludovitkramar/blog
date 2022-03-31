@@ -6,8 +6,10 @@ export default function GraphViewer(props) {
     const [xOffset, setxOffset] = useState(200);
     const [yOffset, setyOffset] = useState(200);
     const [points, setPoints] = useState([]);
+    const [line, setLines] = useState([]);
     const [graphLength, setGraphLength] = useState(0);
     const [samples, setSamples] = useState([]);
+    const [seconds, setSeconds] = useState(0)
     const loaded = useRef(false);
 
     const G = props.graph;
@@ -39,7 +41,10 @@ export default function GraphViewer(props) {
     function calcularEcuacionDeDosIncognitas(matrix) {
         const matriz = escalera(matrix)
         //console.log(matriz);
-        if (!isMatrixValid(matriz)) throw ('Invalid matrix, can\'t solve');
+        if (!isMatrixValid(matriz)) {
+            console.warn(matrix);
+            throw ('Invalid matrix, can\'t solve');
+        }
         var x = 0;
         var y = 0;
         if (matriz[5] === 0 && matriz[4] === 0) return [Infinity, Infinity] //infinitas soluciones
@@ -62,40 +67,102 @@ export default function GraphViewer(props) {
         return nodes
     }
 
-    //console.log(calcularEcuacionDeDosIncognitas([-11, 9, 4, -11, 100, 4]));
+    //console.log(calcularEcuacionDeDosIncognitas([-3, 1, 2, -7, 1, -5])); //para calcular interseccion entre y = 3x + 2 y y = 7x -5
 
     function findParentOf(node, graph) {
         const LinksArray = graph.slice(2);
         for (var index = 1; index < LinksArray.length; index += 2) {
             if (LinksArray[index] === node) return LinksArray[index - 1];
         }
+        return -1
+    }
+
+    function checkIntersectionBetweenPoints(m1, n1, lines, exclusions, p1, p2) {
+        //exclusion is an array of numbers, if the index of an element of the array lines is in exclusions, that line shall be ignored
+        var collides = false;
+        var intrX = null;
+        var intrY = null;
+        var lineCrossed = null;
+        var done = false;
+        //console.log('🎵');
+        //console.log(exclusions)
+        lines.forEach((value, index) => {
+            if (!exclusions.includes(index) && !done) { //if not excluded and not done
+                const m2 = value[0];
+                const n2 = value[1];
+                // y = mx + n es el formato de la línea, pero para resolver la ecuación han que convertirlo en: -mx + y = n
+                [intrX, intrY] = calcularEcuacionDeDosIncognitas([-m1, 1, n1, -m2, 1, n2])
+                //console.log(`Line y = ${m1}x + ${n1} collides at ${intrX},${intrY} with line ${index}`)
+                if (!isNaN(intrX)) {
+                    if (isPointBetweenTwoPoints([intrX, intrY], p1, p2, m1, n1)) {
+                    collides = true;
+                    lineCrossed = index;
+                    }
+                }
+            }
+        });
+        return [collides, [intrX, intrY], lineCrossed]
+    }
+
+    function isPointBetweenTwoPoints(itr, p1, p2, m, n) {
+        if (p1[0] > p2[0]) {
+            var temp = p1
+            p1 = p2
+            p2 = temp
+        }
+        if (itr[0] > p1[0] && itr[0] < p2[0]) {
+            const intrY = itr[0] * m + n
+            if (intrY + 0.001 > itr[1] && intrY - 0.001 < itr[1]) return true
+        }
+        return false
     }
 
     function generatePointsFromGraph(graph) {
         const nodesCount = graph[0]
         const linksCount = graph[1]
         const links = graph.slice(2);
-        const distance = .5;
+        const distance = 1;
         var pointsArray = [[0, 0],]; //node 0 (index 0) is on the origin
+        var linesArray = []; //just like pointsArray, the index is the node number, each element is an array of first "m"  and then "n" of the ecuacion punto pendiante
         var BFSqueue = [0] //start the search from node 0
         var angle = 0;
         while (BFSqueue.length > 0) {
             const currentNode = BFSqueue[0] // the first item on the queue is the current node
             const currentPoint = pointsArray[currentNode] //get the point from which we'll create the new links (vectors)
             const neighbors = getChildsOf(graph, currentNode);
-            neighbors.forEach(element => {
+            neighbors.forEach(element => { //explore neighbors of current node
                 if (!BFSqueue.includes(element)) { //if the queue doesn't have that element
-                    BFSqueue.push(element);
-                    const newX = currentPoint[0] + distance * Math.cos(angle);
-                    const newY = currentPoint[1] + distance * Math.sin(angle);
-                    pointsArray[element] = [newX, newY]
-                    //TODO: check collision
+                    BFSqueue.push(element); // add to the queue
+                    const oldX = currentPoint[0];
+                    const oldY = currentPoint[1];
+                    var newX = oldX + distance * Math.cos(angle);
+                    var newY = oldY + distance * Math.sin(angle);
+                    //calculate the line that the two points form in ecuacion punto pendiente format. (m , n)
+                    var [m, n] = calcularEcuacionDeDosIncognitas([oldX, 1, oldY, newX, 1, newY]);
+                    // console.log(`Line [${element}] is: y = ${m}x + ${n}`);
+                    const exclusion = getChildsOf(graph, element).concat([currentNode]).concat(neighbors); //childs of current node, parent node, childs of parent node
+                    var [collides, intersection, lineCrossed] = checkIntersectionBetweenPoints(m, n, linesArray, exclusion, [oldX, oldY], [newX, newY], m, n);
+                    console.log(`🪩 Line from ${currentNode} to ${element} collides[${collides}] with ${lineCrossed} at ${intersection}`);
+                    while (collides) {
+                        if (!isPointBetweenTwoPoints(intersection, [oldX, oldY], [newX, newY] ,m, n)) break
+                        //recalculate a new point and line
+                        angle += .1;
+                        newX = oldX + distance * Math.cos(angle);
+                        newY = oldY + distance * Math.sin(angle);
+                        [m, n] = calcularEcuacionDeDosIncognitas([oldX, 1, oldY, newX, 1, newY])
+                        console.log(m, n);
+                        [collides, intersection, lineCrossed] = checkIntersectionBetweenPoints(m, n, linesArray, exclusion, [oldX, oldY], [newX, newY], m, n);
+                    }
+
+                    pointsArray[element] = [newX, newY] //add the point of the explred neighbor
+                    linesArray[element] = [m, n]; // and line
+
                     angle += .1;
                 }
             });
             BFSqueue = BFSqueue.slice(1) //remove the fist item from the queue
         }
-        return pointsArray
+        return [pointsArray, linesArray]
     }
 
     function graphChanged(graph, nd) { //graph is a kantenliste, an array of number
@@ -195,27 +262,26 @@ export default function GraphViewer(props) {
             loaded.current = false;
         }
         if (!loaded.current) {
-            const generatedPoints = generatePointsFromGraph(G);
-            setPoints(generatedPoints);
-
-            console.log(generatedPoints)
-            console.log(points);
-
-            // perform BFS algorithm and create the links 
-
+            // perform BFS algorithm and create the points and links
             // the root node is at (0, 0)
-            // when creating links, the line cannot cross with any other line, 
-            // except if: the point of intersection is the parent node's point && the other line has the same parent
-            // each link is name with a string "0/1" means link from 0 to 1, "/" is necessary to distinguish between "11/1" and "1/11"
-            // the links are stored in the object named "links"
+            const [generatedPoints, generatedLines] = generatePointsFromGraph(G);
+            setPoints(generatedPoints);
+            setLines(generatedLines)
 
-            // after all links are created, the points (nodes) will have reverse gravitation and friction that separates one
-            // from another and eventually stops them, the links act like spring, so that the points cannot drift too far away
-            // a function calculates the forces on every point and moves the one time step, it'll need to be repeated periodically untils movement stops.
+            console.log("🔵 Finished generating points and lines:")
+            console.log(generatedPoints)
+            console.log(generatedLines);
 
             loaded.current = true;
         }
-    }, [G, generatePointsFromGraph, points])
+
+        // const timer = setInterval(() => {
+        //     console.log(`Second: ${seconds}`)
+        //     setSeconds(seconds + 1)
+        // }, 1000);
+
+        // return () => clearInterval(timer)
+    }, [G, generatePointsFromGraph, points, graphChanged, nData, seconds])
 
 
     const reactCode = generateReactCode(points)
@@ -238,7 +304,7 @@ function Node(props) {
         left: `${props.left}px`,
     }
     function data() {
-        if (typeof(props.data === 'object')) {
+        if (typeof (props.data === 'object')) {
             return JSON.stringify(props.data)
         } else {
             return props.data
