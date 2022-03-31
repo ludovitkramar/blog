@@ -77,16 +77,18 @@ export default function GraphViewer(props) {
         return -1
     }
 
-    function checkIntersectionBetweenPoints(m1, n1, lines, exclusions, p1, p2) {
+    function checkIntersectionBetweenPoints(m1, n1, lines, exclusions, p1, p2, points, graph) {
         //exclusion is an array of numbers, if the index of an element of the array lines is in exclusions, that line shall be ignored
         var collides = false;
         var intrX = null;
         var intrY = null;
         var lineCrossed = null;
         var done = false;
+        var x = null;
+        var y = null;
         //console.log('🎵');
         //console.log(exclusions)
-        lines.forEach((value, index) => {
+        lines.forEach((value, index) => { //index is the node to which the line is directed
             if (!exclusions.includes(index) && !done) { //if not excluded and not done
                 const m2 = value[0];
                 const n2 = value[1];
@@ -94,27 +96,48 @@ export default function GraphViewer(props) {
                 [intrX, intrY] = calcularEcuacionDeDosIncognitas([-m1, 1, n1, -m2, 1, n2])
                 //console.log(`Line y = ${m1}x + ${n1} collides at ${intrX},${intrY} with line ${index}`)
                 if (!isNaN(intrX)) {
+                    const p3 = points[findParentOf(index, graph)];
+                    const p4 = points[index];
+                    console.log(index, p3, p4);
+                    console.log(points)
                     if (isPointBetweenTwoPoints([intrX, intrY], p1, p2, m1, n1)) {
-                    collides = true;
-                    lineCrossed = index;
+                        if (isPointBetweenTwoPoints([intrX, intrY], p3, p4, m2, n2)) {
+                            x = intrX
+                            y = intrY
+                            collides = true;
+                            lineCrossed = index;
+                        }
                     }
                 }
             }
         });
-        return [collides, [intrX, intrY], lineCrossed]
+        return [collides, [x, y], lineCrossed]
     }
 
     function isPointBetweenTwoPoints(itr, p1, p2, m, n) {
+        console.log('🟠 isPointBetweenTwoPoints ?')
+        console.log(`Intersection=(${itr}), P1=(${p1}), P2=(${p2}), line=(y=${m}x+${n})`)
         if (p1[0] > p2[0]) {
             var temp = p1
             p1 = p2
             p2 = temp
         }
+        console.log(`Intersection=(${itr}), P1=(${p1}), P2=(${p2}), line=(y=${m}x+${n})`)
         if (itr[0] > p1[0] && itr[0] < p2[0]) {
             const intrY = itr[0] * m + n
-            if (intrY + 0.001 > itr[1] && intrY - 0.001 < itr[1]) return true
+            console.log(intrY);
+            if (intrY === itr[1] || (intrY + 0.0001 > itr[1] && intrY - 0.0001 < itr[1])) {
+                console.log("⚪ It is 🟠")
+                return true
+            } else {
+                console.log("🟠 It's not ⚪")
+                return false
+            }
+        } else {
+            console.log("⚪ It's not ⚪")
+            return false
         }
-        return false
+
     }
 
     function generatePointsFromGraph(graph) {
@@ -141,23 +164,31 @@ export default function GraphViewer(props) {
                     var [m, n] = calcularEcuacionDeDosIncognitas([oldX, 1, oldY, newX, 1, newY]);
                     // console.log(`Line [${element}] is: y = ${m}x + ${n}`);
                     const exclusion = getChildsOf(graph, element).concat([currentNode]).concat(neighbors); //childs of current node, parent node, childs of parent node
-                    var [collides, intersection, lineCrossed] = checkIntersectionBetweenPoints(m, n, linesArray, exclusion, [oldX, oldY], [newX, newY], m, n);
+                    var [collides, intersection, lineCrossed] = checkIntersectionBetweenPoints(m, n, linesArray, exclusion, [oldX, oldY], [newX, newY], pointsArray, graph);
                     console.log(`🪩 Line from ${currentNode} to ${element} collides[${collides}] with ${lineCrossed} at ${intersection}`);
+                    var loopCounter = 0;
                     while (collides) {
-                        if (!isPointBetweenTwoPoints(intersection, [oldX, oldY], [newX, newY] ,m, n)) break
+                        loopCounter += 1
+                        if (loopCounter > 10) {
+                            console.warn(`🪩 Line from ${currentNode} to ${element} collides[${collides}] with ${lineCrossed} at ${intersection}`)
+                            console.error("And couldn't find a line without colision")
+                            break
+                        }
+                        //if (!isPointBetweenTwoPoints(intersection, [oldX, oldY], [newX, newY], m, n)) break
                         //recalculate a new point and line
+
                         angle += .1;
                         newX = oldX + distance * Math.cos(angle);
                         newY = oldY + distance * Math.sin(angle);
                         [m, n] = calcularEcuacionDeDosIncognitas([oldX, 1, oldY, newX, 1, newY])
                         console.log(m, n);
-                        [collides, intersection, lineCrossed] = checkIntersectionBetweenPoints(m, n, linesArray, exclusion, [oldX, oldY], [newX, newY], m, n);
+                        [collides, intersection, lineCrossed] = checkIntersectionBetweenPoints(m, n, linesArray, exclusion, [oldX, oldY], [newX, newY], pointsArray, graph);
                     }
 
                     pointsArray[element] = [newX, newY] //add the point of the explred neighbor
                     linesArray[element] = [m, n]; // and line
 
-                    angle += .1;
+                    angle += .05;
                 }
             });
             BFSqueue = BFSqueue.slice(1) //remove the fist item from the queue
