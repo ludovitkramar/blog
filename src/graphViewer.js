@@ -98,10 +98,9 @@ export default function GraphViewer(props) {
                 if (!isNaN(intrX)) {
                     const p3 = points[findParentOf(index, graph)];
                     const p4 = points[index];
-                    console.log(index, p3, p4);
-                    console.log(points)
+                    //console.log(index, p3, p4);
                     if (isPointBetweenTwoPoints([intrX, intrY], p1, p2, m1, n1)) {
-                        if (isPointBetweenTwoPoints([intrX, intrY], p3, p4, m2, n2)) {
+                        if (isPointBetweenTwoPoints([intrX, intrY], p3, p4, m2, n2)) { //there's no evidence that this works properly, p3 p4 may not be the points that we want
                             x = intrX
                             y = intrY
                             collides = true;
@@ -115,26 +114,26 @@ export default function GraphViewer(props) {
     }
 
     function isPointBetweenTwoPoints(itr, p1, p2, m, n) {
-        console.log('🟠 isPointBetweenTwoPoints ?')
-        console.log(`Intersection=(${itr}), P1=(${p1}), P2=(${p2}), line=(y=${m}x+${n})`)
+        //console.log('🟠 isPointBetweenTwoPoints ?')
+        //console.log(`Intersection=(${itr}), P1=(${p1}), P2=(${p2}), line=(y=${m}x+${n})`)
         if (p1[0] > p2[0]) {
             var temp = p1
             p1 = p2
             p2 = temp
         }
-        console.log(`Intersection=(${itr}), P1=(${p1}), P2=(${p2}), line=(y=${m}x+${n})`)
+        //console.log(`Intersection=(${itr}), P1=(${p1}), P2=(${p2}), line=(y=${m}x+${n})`)
         if (itr[0] > p1[0] && itr[0] < p2[0]) {
             const intrY = itr[0] * m + n
-            console.log(intrY);
+            //console.log(intrY);
             if (intrY === itr[1] || (intrY + 0.0001 > itr[1] && intrY - 0.0001 < itr[1])) {
-                console.log("⚪ It is 🟠")
+                //console.log("⚪ It is 🟠")
                 return true
             } else {
-                console.log("🟠 It's not ⚪")
+                //console.log("🟠 It's not ⚪")
                 return false
             }
         } else {
-            console.log("⚪ It's not ⚪")
+            //console.log("⚪ It's not ⚪")
             return false
         }
 
@@ -169,7 +168,7 @@ export default function GraphViewer(props) {
                     var loopCounter = 0;
                     while (collides) {
                         loopCounter += 1
-                        if (loopCounter > 10) {
+                        if (loopCounter > 100) {
                             console.warn(`🪩 Line from ${currentNode} to ${element} collides[${collides}] with ${lineCrossed} at ${intersection}`)
                             console.error("And couldn't find a line without colision")
                             break
