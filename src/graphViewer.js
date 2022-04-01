@@ -235,7 +235,7 @@ export default function GraphViewer(props) {
     }
 
     function physics(points, lines, velocities, graph) {
-        const timeStep = .1; //0.02 = 20ms
+        const timeStep = .02; //0.02 = 20ms
         const intersectionAcclFactor = 1;
         var accelArray = [];
         var velArray = velocities;
@@ -268,9 +268,9 @@ export default function GraphViewer(props) {
             const exclusions = [currentPoint, parentPoint].concat(allChilds).concat(childsOfParent)
             const [collides, intersections, linesCrossed] = checkIntersectionBetweenPoints(m, n, lines, exclusions, p1, p2, points, graph)
 
-            console.log(`[${currentPoint}] Collides: ${collides}`)
-            console.log(intersections);
-            console.log(linesCrossed)
+            // console.log(`[${currentPoint}] Collides: ${collides}`)
+            // console.log(intersections);
+            // console.log(linesCrossed)
 
             // lines intersection force
             var intersectionAccel = [0, 0];
@@ -311,11 +311,11 @@ export default function GraphViewer(props) {
             }
         })
 
-        console.log(accelArray)
+        //console.log(accelArray)
 
         //calculate velocity from accelArray
         accelArray.forEach((acclVector, nodeID) => {
-            console.log(acclVector, nodeID);
+            //console.log(acclVector, nodeID);
             const currentV = velArray[nodeID];
             const cVx = currentV[0];
             const cVy = currentV[1];
@@ -326,7 +326,7 @@ export default function GraphViewer(props) {
             velArray[nodeID] = [Vx, Vy]
         })
 
-        console.log(velArray);
+        //console.log(velArray);
 
         //calculate position from velArray 
         velArray.forEach((velVector, nodeID) => {
@@ -348,7 +348,7 @@ export default function GraphViewer(props) {
     }
 
     function runPhysics() {
-        console.log('📐 Run physics!');
+        //console.log('📐 Run physics!');
         function initializeVelocities(ps) {
             var vs = []
             for (var key in ps) {
@@ -419,7 +419,7 @@ export default function GraphViewer(props) {
     }
 
     useEffect(() => {
-        console.log('useEffect');
+        //console.log('useEffect');
         if (graphChanged(G, nData)) {
             loaded.current = false;
         }
@@ -441,13 +441,13 @@ export default function GraphViewer(props) {
             console.log(`Second: ${seconds}`)
             runPhysics()
             setSeconds(seconds + 1)
-        }, 100);
+        }, 16);
 
         return () => clearInterval(timer)
     }, [G, generatePointsFromGraph, points, graphChanged, nData, seconds])
 
     const reactCode = generateReactCode(points)
-    console.log('render')
+    //console.log('render')
     return (
         <div className={style.container}>
             <input className={style.range} type="range" onChange={handleZoom} min="2" max="200" step=".1"></input>
