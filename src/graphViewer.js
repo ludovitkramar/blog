@@ -226,29 +226,125 @@ export default function GraphViewer(props) {
         return false
     }
 
+    function vectorLength(v) {
+        return Math.sqrt(v[0] ** 2 + v[1] ** 2)
+    }
+
+    function distanceBtw2Points(p1, p2) {
+        return vectorLength([p2[0] - p1[0], p2[1] - p1[1]])
+    }
+
     function physics(points, lines, velocities, graph) {
-        const timeStep = .02; //20ms
+        const timeStep = .1; //0.02 = 20ms
+        const intersectionAcclFactor = 1;
         var accelArray = [];
+        var velArray = velocities;
+        var linesArray = lines;
+        var pointsArray = points;
         console.log(points);
         console.log(lines)
         console.log(velocities)
         console.log(graph);
 
-        const currentPoint = 2;
-        const parentPoint = findParentOf(currentPoint, graph)
-        const [m, n] = lines[currentPoint];
-        const p1 = points[parentPoint];
-        const p2 = points[currentPoint];
-        const allChilds = getChildsOf(graph, currentPoint);
-        const childsOfParent = getChildsOf(graph, parentPoint);
-        const exclusions = [currentPoint].concat(allChilds).concat(childsOfParent)
-        const [collides, intersections, linesCrossed] = checkIntersectionBetweenPoints(m, n, lines, exclusions, p1, p2, points, graph)
+        function sumAccell(node, value, factor) {
+            if (accelArray[node]) {
+                const v = accelArray[node] //array representing the vector
+                accelArray[node] = v.map((val, ind) => {
+                    return val + value[ind] * factor
+                })
+            } else {
+                accelArray[node] = value;
+            }
+        }
 
-        console.log(`[${currentPoint}] Collides: ${collides}`)
-        console.log(intersections);
-        console.log(linesCrossed)
+        //for each line (all points except 0)
+        lines.forEach((value, currentPoint) => {
+            const parentPoint = findParentOf(currentPoint, graph)
+            const [m, n] = value;
+            const p1 = points[parentPoint];
+            const p2 = points[currentPoint];
+            const allChilds = getChildsOf(graph, currentPoint);
+            const childsOfParent = getChildsOf(graph, parentPoint);
+            const exclusions = [currentPoint, parentPoint].concat(allChilds).concat(childsOfParent)
+            const [collides, intersections, linesCrossed] = checkIntersectionBetweenPoints(m, n, lines, exclusions, p1, p2, points, graph)
 
-        return [points, lines, velocities]
+            console.log(`[${currentPoint}] Collides: ${collides}`)
+            console.log(intersections);
+            console.log(linesCrossed)
+
+            // lines intersection force
+            var intersectionAccel = [0, 0];
+            //for every intersection on the line
+            for (var i = 0; i < intersections.length; i++) {
+                //console.log(i);
+                const p3 = intersections[i]
+                const p4 = points[linesCrossed[i]]
+                const alpha = p4[0] + m * p4[1]
+                const p5 = calcularEcuacionDeDosIncognitas([-m, 1, n, 1, m, alpha])
+                var v = [p4[0] - p5[0], p4[1] - p5[1]];
+                //console.log(v);
+                const vLength = vectorLength(v)
+                //console.log(vLength);
+                const reductionFactor = distanceBtw2Points(p2, p3) / distanceBtw2Points(p2, p1) + 0.05; //0.25 is the base acceleration
+                v = v.map((value) => { return value / vLength * reductionFactor }); //make length of vector = 1, and make the length shorter if the intersection is further from the parent node's point
+                intersectionAccel = intersectionAccel.map((value, index) => { return (value + v[index]) }) //add to the sum of intersection accelerations
+                //console.log(v)
+            }
+            sumAccell(currentPoint, intersectionAccel, intersectionAcclFactor)
+
+            //add friction to acceleration
+            const curV = velArray[currentPoint];
+            sumAccell(currentPoint, [-curV[0], -curV[1]], 1.2)
+
+            //reverse gravitation
+            for (const key in points) { //for every point
+                if (key != currentPoint) { //if not current point
+                    //p2 is this current point
+                    const planetPoint = points[key]
+                    const vpPp2 = [p2[0] - planetPoint[0], p2[1] - planetPoint[1]]
+                    const distanceP = vectorLength(vpPp2);
+                    const force = 1 / distanceP ** 2;
+                    const Gx = vpPp2[0] / distanceP * force;
+                    const Gy = vpPp2[1] / distanceP * force;
+                    sumAccell(currentPoint, [Gx, Gy], .001)
+                }
+            }
+        })
+
+        console.log(accelArray)
+
+        //calculate velocity from accelArray
+        accelArray.forEach((acclVector, nodeID) => {
+            console.log(acclVector, nodeID);
+            const currentV = velArray[nodeID];
+            const cVx = currentV[0];
+            const cVy = currentV[1];
+            const cAx = acclVector[0];
+            const cAy = acclVector[1];
+            const Vx = cVx + cAx * timeStep;
+            const Vy = cVy + cAy * timeStep;
+            velArray[nodeID] = [Vx, Vy]
+        })
+
+        console.log(velArray);
+
+        //calculate position from velArray 
+        velArray.forEach((velVector, nodeID) => {
+            if (nodeID != 0) {
+                const currentP = points[nodeID];
+                const Px = currentP[0];
+                const Py = currentP[1];
+                const Vx = velVector[0];
+                const Vy = velVector[1];
+                const x = Px + (Vx * timeStep);
+                const y = Py + (Vy * timeStep);
+                pointsArray[nodeID] = [x, y]
+                const parentPoint = pointsArray[findParentOf(nodeID, graph)]
+                linesArray[nodeID] = calcularEcuacionDeDosIncognitas([parentPoint[0], 1, parentPoint[1], x, 1, y]);
+            }
+        })
+
+        return [pointsArray, linesArray, velArray]
     }
 
     function runPhysics() {
@@ -323,6 +419,7 @@ export default function GraphViewer(props) {
     }
 
     useEffect(() => {
+        console.log('useEffect');
         if (graphChanged(G, nData)) {
             loaded.current = false;
         }
@@ -340,21 +437,21 @@ export default function GraphViewer(props) {
             loaded.current = true;
         }
 
-        // const timer = setInterval(() => {
-        //     console.log(`Second: ${seconds}`)
-        //     setSeconds(seconds + 1)
-        // }, 1000);
+        const timer = setInterval(() => {
+            console.log(`Second: ${seconds}`)
+            runPhysics()
+            setSeconds(seconds + 1)
+        }, 100);
 
-        // return () => clearInterval(timer)
+        return () => clearInterval(timer)
     }, [G, generatePointsFromGraph, points, graphChanged, nData, seconds])
 
-
     const reactCode = generateReactCode(points)
-
+    console.log('render')
     return (
         <div className={style.container}>
             <input className={style.range} type="range" onChange={handleZoom} min="2" max="200" step=".1"></input>
-            <div onMouseMove={handleDrag} className={style.container2} onClick={runPhysics}>
+            <div onMouseMove={handleDrag} className={style.container2} onMouseUp={runPhysics}>
                 {/* <Node node="1" type="article" data="nodeData" top="40" left="100" />
                 <Link width="200" top="20" left="50" rotate="40"></Link> */}
                 {reactCode}
