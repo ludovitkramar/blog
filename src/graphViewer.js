@@ -7,6 +7,7 @@ export default function GraphViewer(props) {
     const [yOffset, setyOffset] = useState(200);
     const [points, setPoints] = useState([]);
     const [line, setLines] = useState([]);
+    const [velocities, setVelocities] = useState([]);
     const [graphLength, setGraphLength] = useState(0);
     const [samples, setSamples] = useState([]);
     const [seconds, setSeconds] = useState(0)
@@ -82,7 +83,9 @@ export default function GraphViewer(props) {
         var collides = false;
         var intrX = null;
         var intrY = null;
+        var intersections = [];
         var lineCrossed = null;
+        var linesCrossed = [];
         var done = false;
         var x = null;
         var y = null;
@@ -105,12 +108,14 @@ export default function GraphViewer(props) {
                             y = intrY
                             collides = true;
                             lineCrossed = index;
+                            intersections.push([x, y]);
+                            linesCrossed.push(lineCrossed);
                         }
                     }
                 }
             }
         });
-        return [collides, [x, y], lineCrossed]
+        return [collides, intersections, linesCrossed]
     }
 
     function isPointBetweenTwoPoints(itr, p1, p2, m, n) {
@@ -221,6 +226,50 @@ export default function GraphViewer(props) {
         return false
     }
 
+    function physics(points, lines, velocities, graph) {
+        const timeStep = .02; //20ms
+        var accelArray = [];
+        console.log(points);
+        console.log(lines)
+        console.log(velocities)
+        console.log(graph);
+
+        const currentPoint = 2;
+        const parentPoint = findParentOf(currentPoint, graph)
+        const [m, n] = lines[currentPoint];
+        const p1 = points[parentPoint];
+        const p2 = points[currentPoint];
+        const allChilds = getChildsOf(graph, currentPoint);
+        const childsOfParent = getChildsOf(graph, parentPoint);
+        const exclusions = [currentPoint].concat(allChilds).concat(childsOfParent)
+        const [collides, intersections, linesCrossed] = checkIntersectionBetweenPoints(m, n, lines, exclusions, p1, p2, points, graph)
+
+        console.log(`[${currentPoint}] Collides: ${collides}`)
+        console.log(intersections);
+        console.log(linesCrossed)
+
+        return [points, lines, velocities]
+    }
+
+    function runPhysics() {
+        console.log('📐 Run physics!');
+        function initializeVelocities(ps) {
+            var vs = []
+            for (var key in ps) {
+                vs[key] = [0, 0]
+            }
+            return vs
+        }
+        if (velocities.length !== points.length) {
+            setVelocities(initializeVelocities(points))
+        } else {
+            const [ps, ls, vs] = physics(points, line, velocities, G)
+            setPoints(ps);
+            setLines(ls);
+            setVelocities(vs);
+        }
+    }
+
     function handleScroll(event) {
         console.log(event.deltaY)
         setZoom(zoom - event.deltaY * 0.5)
@@ -242,8 +291,8 @@ export default function GraphViewer(props) {
     function generateReactCode(points) {
         var reactCode = [];
         points.forEach((point, node, points) => {
-            const pointX = point[0] * zoom + xOffset;
-            const pointY = point[1] * zoom + yOffset;
+            const pointX = -point[1] * zoom + xOffset;
+            const pointY = point[0] * zoom + yOffset;
             //console.log(pointY);
             reactCode.push(
                 <Node key={node + "n"} node={node} type={nType[node]} data={nData[node]} top={pointX} left={pointY} />
@@ -251,8 +300,8 @@ export default function GraphViewer(props) {
             try {
                 if (node !== 0) {
                     const parentNode = findParentOf(node, G);
-                    const linkX1 = points[parentNode][0] * zoom + xOffset + 25;
-                    const linkY1 = points[parentNode][1] * zoom + yOffset + 25;
+                    const linkY1 = points[parentNode][0] * zoom + yOffset + 25;
+                    const linkX1 = -points[parentNode][1] * zoom + xOffset + 25;
                     const linkX2 = pointX + 25;
                     const linkY2 = pointY + 25;
                     const length = Math.sqrt((linkX2 - linkX1) ** 2 + (linkY2 - linkY1) ** 2)
@@ -305,7 +354,7 @@ export default function GraphViewer(props) {
     return (
         <div className={style.container}>
             <input className={style.range} type="range" onChange={handleZoom} min="2" max="200" step=".1"></input>
-            <div onMouseMove={handleDrag} className={style.container2}>
+            <div onMouseMove={handleDrag} className={style.container2} onClick={runPhysics}>
                 {/* <Node node="1" type="article" data="nodeData" top="40" left="100" />
                 <Link width="200" top="20" left="50" rotate="40"></Link> */}
                 {reactCode}
