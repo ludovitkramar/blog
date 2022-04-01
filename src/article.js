@@ -159,6 +159,7 @@ export default function Article(props) {
                 consumeLine(listLinesCount);
             } else if (isLineImage(line)) {
                 function extractSource(input) {
+                    //TODO: allow images without title
                     var src = input.substring(line.indexOf('(') + 1, line.indexOf('"')); //between ( and "
                     src = src.replace(' ', ''); //remove white spaces
                     if (src.slice(0, 4) === 'http') return src //if starts with http leave as is
@@ -505,14 +506,18 @@ function Codeblock(props) {
     return (
         <div className={style.code}>
             <code>
-                {props.code.map((value)=> {return <><span>{value}</span> <br /></>})}
+                {props.code.map((value) => { return <><span>{value}</span> <br /></> })}
             </code>
         </div>
     );
 }
 
 function Image(props) {
+    function setSrc(src) {
+        if (src.slice(0, 7) === "http://" || src.slice(0, 8) === "https://") return src
+        return `${settings.mediaURL}/${src}`
+    }
     return (
-        <img src={`${settings.mediaURL}/${props.src}`} alt={props.alt} title={props.title} className={style.img}></img>
+        <img src={setSrc(props.src)} alt={props.alt} title={props.title} className={style.img}></img>
     )
 }
