@@ -506,7 +506,7 @@ function Codeblock(props) {
     return (
         <div className={style.code}>
             <code>
-                {props.code.map((value) => { return <><span>{value}</span> <br /></> })}
+                {props.code.map((value, index) => { return <span key={index}>{value}<br /></span>  })}
             </code>
         </div>
     );
