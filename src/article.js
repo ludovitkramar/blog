@@ -427,9 +427,8 @@ export default function Article(props) {
 
     return (
         <article className={style.article}>
-            {renderArticle(tree, treeContents, treeTags, 0)}
-
             <GraphViewer graph={tree} nodesData={treeContents} nodesType={treeTags} />
+            {renderArticle(tree, treeContents, treeTags, 0)}
         </article>
     );
 }
@@ -506,7 +505,7 @@ function Codeblock(props) {
     return (
         <div className={style.code}>
             <code>
-                {props.code}
+                {props.code.map((value)=> {return <><span>{value}</span> <br /></>})}
             </code>
         </div>
     );
