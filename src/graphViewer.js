@@ -147,11 +147,18 @@ export default function GraphViewer(props) {
         var pointsArray = [[0, 0],]; //node 0 (index 0) is on the origin
         var linesArray = []; //just like pointsArray, the index is the node number, each element is an array of first "m"  and then "n" of the ecuacion punto pendiante
         var BFSqueue = [0] //start the search from node 0
-        var angle = 0;
         while (BFSqueue.length > 0) {
+            const abanico = 2;
             const currentNode = BFSqueue[0] // the first item on the queue is the current node
             const currentPoint = pointsArray[currentNode] //get the point from which we'll create the new links (vectors)
             const neighbors = getChildsOf(graph, currentNode);
+            var angleIncrement = abanico / neighbors.length;
+            if (currentNode === 0) angleIncrement = Math.PI * 1.8 / neighbors.length
+            var angle = 0;
+            var tempAngle = 0
+            tempAngle = Math.acos(currentPoint[0] / Math.sqrt(currentPoint[0] ** 2 + currentPoint[1] ** 2)) // angle = y / root(x^2 + y^2)
+            if (currentPoint[1] < 0) tempAngle = -tempAngle;
+            if (currentNode !== 0) angle = tempAngle - ((neighbors.length - 1) * angleIncrement / 2);
             neighbors.forEach(element => { //explore neighbors of current node
                 if (!BFSqueue.includes(element)) { //if the queue doesn't have that element
                     BFSqueue.push(element); // add to the queue
@@ -162,32 +169,11 @@ export default function GraphViewer(props) {
                     //calculate the line that the two points form in ecuacion punto pendiente format. (m , n)
                     var [m, n] = calcularEcuacionDeDosIncognitas([oldX, 1, oldY, newX, 1, newY]);
                     // console.log(`Line [${element}] is: y = ${m}x + ${n}`);
-                    const exclusion = getChildsOf(graph, element).concat([currentNode]).concat(neighbors); //childs of current node, parent node, childs of parent node
-                    var [collides, intersection, lineCrossed] = checkIntersectionBetweenPoints(m, n, linesArray, exclusion, [oldX, oldY], [newX, newY], pointsArray, graph);
-                    console.log(`🪩 Line from ${currentNode} to ${element} collides[${collides}] with ${lineCrossed} at ${intersection}`);
-                    var loopCounter = 0;
-                    while (collides) {
-                        loopCounter += 1
-                        if (loopCounter > 100) {
-                            console.warn(`🪩 Line from ${currentNode} to ${element} collides[${collides}] with ${lineCrossed} at ${intersection}`)
-                            console.error("And couldn't find a line without colision")
-                            break
-                        }
-                        //if (!isPointBetweenTwoPoints(intersection, [oldX, oldY], [newX, newY], m, n)) break
-                        //recalculate a new point and line
-
-                        angle += .1;
-                        newX = oldX + distance * Math.cos(angle);
-                        newY = oldY + distance * Math.sin(angle);
-                        [m, n] = calcularEcuacionDeDosIncognitas([oldX, 1, oldY, newX, 1, newY])
-                        console.log(m, n);
-                        [collides, intersection, lineCrossed] = checkIntersectionBetweenPoints(m, n, linesArray, exclusion, [oldX, oldY], [newX, newY], pointsArray, graph);
-                    }
 
                     pointsArray[element] = [newX, newY] //add the point of the explred neighbor
                     linesArray[element] = [m, n]; // and line
 
-                    angle += .05;
+                    angle += angleIncrement;
                 }
             });
             BFSqueue = BFSqueue.slice(1) //remove the fist item from the queue
