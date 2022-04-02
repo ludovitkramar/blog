@@ -11,6 +11,7 @@ export default function GraphViewer(props) {
     const [graphLength, setGraphLength] = useState(0);
     const [samples, setSamples] = useState([]);
     const [seconds, setSeconds] = useState(0)
+    const [paused, setPaused] = useState(true);
     const loaded = useRef(false);
 
     const G = props.graph;
@@ -452,21 +453,23 @@ export default function GraphViewer(props) {
             loaded.current = true;
         }
 
-        const timer = setInterval(() => {
-            console.log(`Second: ${seconds}`)
-            runPhysics()
-            setSeconds(seconds + 1)
-        }, 16);
+        if (!paused) {
+            const timer = setInterval(() => {
+                console.log(`Tick: ${seconds}`)
+                runPhysics()
+                setSeconds(seconds + 1)
+            }, 16);
 
-        return () => clearInterval(timer)
-    }, )
+            return () => clearInterval(timer)
+        }
+    })
 
     const reactCode = generateReactCode(points)
     //console.log('render')
     return (
         <div className={style.container}>
             <input className={style.range} type="range" onChange={handleZoom} min="2" max="200" step=".1"></input>
-            <div onMouseMove={handleDrag} className={style.container2}>
+            <div onMouseMove={handleDrag} className={style.container2} onClick={() => { setPaused(!paused) }}>
                 {/* <Node node="1" type="article" data="nodeData" top="40" left="100" />
                 <Link width="200" top="20" left="50" rotate="40"></Link> */}
                 {reactCode}
