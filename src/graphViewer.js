@@ -237,14 +237,17 @@ export default function GraphViewer(props) {
     function physics(points, lines, velocities, graph) {
         const timeStep = .02; //0.02 = 20ms
         const intersectionAcclFactor = 1;
+        const frictionFactor = 1.2;
+        const antigravityFactor = 0.01;
+        const springFactor = 5;
         var accelArray = [];
         var velArray = velocities;
         var linesArray = lines;
         var pointsArray = points;
-        console.log(points);
-        console.log(lines)
-        console.log(velocities)
-        console.log(graph);
+        //console.log(points);
+        //console.log(lines)
+        //console.log(velocities)
+        //console.log(graph);
 
         function sumAccell(node, value, factor) {
             if (accelArray[node]) {
@@ -294,7 +297,7 @@ export default function GraphViewer(props) {
 
             //add friction to acceleration
             const curV = velArray[currentPoint];
-            sumAccell(currentPoint, [-curV[0], -curV[1]], 1.2)
+            sumAccell(currentPoint, [-curV[0], -curV[1]], frictionFactor)
 
             //reverse gravitation
             for (const key in points) { //for every point
@@ -306,8 +309,20 @@ export default function GraphViewer(props) {
                     const force = 1 / distanceP ** 2;
                     const Gx = vpPp2[0] / distanceP * force;
                     const Gy = vpPp2[1] / distanceP * force;
-                    sumAccell(currentPoint, [Gx, Gy], .001)
+                    sumAccell(currentPoint, [Gx, Gy], antigravityFactor)
                 }
+            }
+
+            //spring force
+            const longitudEnReposo = 1;
+            const p1p2Distancia = distanceBtw2Points(p1, p2);
+            const p1p2Normalizado = [(p2[0] - p1[0]) / p1p2Distancia, (p2[1] - p1[1]) / p1p2Distancia];
+            const elasticForce = (p1p2Distancia - longitudEnReposo) / 2
+            if (parentPoint == 0) {
+                sumAccell(currentPoint, [-(p1p2Normalizado[0] * elasticForce * 2), -(p1p2Normalizado[1] * elasticForce * 2)], springFactor)
+            } else {
+                sumAccell(currentPoint, [-(p1p2Normalizado[0] * elasticForce), -(p1p2Normalizado[1] * elasticForce)], springFactor)
+                sumAccell(parentPoint, [(p1p2Normalizado[0] * elasticForce), (p1p2Normalizado[1] * elasticForce)], springFactor)
             }
         })
 
@@ -444,14 +459,14 @@ export default function GraphViewer(props) {
         }, 16);
 
         return () => clearInterval(timer)
-    }, [G, generatePointsFromGraph, points, graphChanged, nData, seconds])
+    }, )
 
     const reactCode = generateReactCode(points)
     //console.log('render')
     return (
         <div className={style.container}>
             <input className={style.range} type="range" onChange={handleZoom} min="2" max="200" step=".1"></input>
-            <div onMouseMove={handleDrag} className={style.container2} onMouseUp={runPhysics}>
+            <div onMouseMove={handleDrag} className={style.container2}>
                 {/* <Node node="1" type="article" data="nodeData" top="40" left="100" />
                 <Link width="200" top="20" left="50" rotate="40"></Link> */}
                 {reactCode}
