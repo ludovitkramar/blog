@@ -30,40 +30,39 @@ export default function Article(props) {
     }, [props.article])
 
     if (loading) return <article className={style.article}>Loading...</article>;
-    if (error) return <article className={style.article}>Error</article>
+    if (error) return <article className={style.article}>Error downloading article</article>
 
     console.log(data)
+
+    function findParentOf(node, graph) {
+        const LinksArray = graph.slice(2);
+        for (var index = 1; index < LinksArray.length; index += 2) {
+            if (LinksArray[index] === node) return LinksArray[index - 1];
+        }
+    }
 
     const G = [1, 0,]; //kantenliste
     const nD = { 0: 0, };
     const nT = { 0: 'root', };
 
     function parser(markdown, graph, nodeData, nodeType, h) {
-        const newlineSpetialCharacters = ['# ', '##', '- ', '* ', '``', '!['];
+        const newlineSpetialCharacters = ['# ', '##', '- ', '* ', '``', '![', '--', '**', '> '];
         function getNodesCount() { return graph[0] };
         function updateNodesLinksCount() {
             const linksArray = graph.slice(2);
-            var nodesArray = [];
             const linksCount = linksArray.length / 2;
-            for (const i in linksArray) {
-                const nodeIndex = linksArray[i];
-                if (!nodesArray.includes(nodeIndex)) nodesArray.push(nodeIndex)
-            }
-            const nodesCount = nodesArray.length;
-            graph[0] = nodesCount;
+            graph[0] = linksCount + 1;
             graph[1] = linksCount;
         }
 
         function isLineImage(line) {
             var isImage = true;
-            if (!line.slice(0, 2) === '![') isImage = false //if starts with ![
+            if (line.slice(0, 2) !== '![') isImage = false //if starts with ![
             //bellow checks order of things
             if (line.indexOf('!') > line.indexOf('[')) isImage = false;
             if (line.indexOf('[') > line.indexOf(']')) isImage = false;
             if (line.indexOf(']') > line.indexOf('(')) isImage = false;
-            if (line.indexOf('(') > line.indexOf('"')) isImage = false;
-            if (line.indexOf('"') > line.lastIndexOf('"')) isImage = false;
-            if (line.lastIndexOf('"') > line.indexOf(')')) isImage = false;
+            if (line.indexOf('(') > line.indexOf(')')) isImage = false;
             if (line.slice(line.indexOf(')')) !== ')') isImage = false; //if there's anything after )
             return isImage
         }
@@ -76,18 +75,25 @@ export default function Article(props) {
             return isHeading
         }
 
+        function isLineOlListItem(input) {
+            const beforeSpace = input.split(' ', 1)[0]
+            if (isNaN(beforeSpace * 1)) return false
+            if (beforeSpace.slice(-1) !== '.') return false
+            return true
+        }
+
         function handleLineWithSpetialCharacters(line, rootNode) {
             const beforeFirstWhiteSpace = line.split(' ', 1)[0];
-            if (!isNaN(beforeFirstWhiteSpace * 1)) { //if its a number, ol
-                // console.warn(`${line} is ol`)
+            if (isLineOlListItem(line)) { //if its a number ending with .
+                //console.warn(`${line} is ol`)
                 const olRootNode = createNode('OrderedList', 0, rootNode);
                 var listLinesCount = 0;
                 var lastListItemNode = null;
                 for (const i in markdown) {
                     const currentLineFirstCharacter = markdown[i][0];
-                    const currentLineBeforeSpace = markdown[i].split(' ', 1)[0];
-                    if (isNaN(currentLineBeforeSpace * 1) &&
-                        currentLineFirstCharacter !== ' ') break //if line doesn't start with a number or white space
+                    if (!isLineOlListItem(markdown[i]) &&
+                        currentLineFirstCharacter !== ' ' &&
+                        markdown[i] !== '') break //if line doesn't start with a number and it's not white space, and it's not a blank line
                     listLinesCount += 1;
                 }
                 for (var i = 0; i < listLinesCount; i++) { //for all of the lines that are part of the list
@@ -98,7 +104,8 @@ export default function Article(props) {
                         for (var j = 0; j < listLinesCount; j++) {
                             try {
                                 const nextLine = markdown[i + j];
-                                if (nextLine[0] !== ' ') break
+                                //if (isLineOlListItem(nextLine)) break
+                                if (nextLine[0] !== ' ' && nextLine !== '') break // if nextLine doesn't start with space and nextLine is not blank line
                             } catch (error) {
                                 console.warn(error)
                                 console.warn('error parsing lines with sapces ')
@@ -120,8 +127,8 @@ export default function Article(props) {
                         linesWithSpaces = linesWithSpaces.map((value) => {
                             return value.slice(spacesCount);
                         })
-                        // console.log('💥')
-                        // console.log(linesWithSpaces)
+                        //console.log('💥')
+                        //console.log(linesWithSpaces)
                         // parse them as another markdown document
                         const G = [1, 0,]; //kantenliste
                         const nD = { 0: 0, };
@@ -133,12 +140,6 @@ export default function Article(props) {
                         // console.log(childNodeType);
                         // merge it to the current graph and nodedata and nodetype
                         const newNodesToMergeCount = childGraph[0] - 1;
-                        function findParentOf(node, graph) {
-                            const LinksArray = graph.slice(2);
-                            for (var index = 1; index < LinksArray.length; index += 2) {
-                                if (LinksArray[index] === node) return LinksArray[index - 1];
-                            }
-                        }
                         var childNodesMapping = { 0: lastListItemNode };
                         for (var k = 1; k <= newNodesToMergeCount; k++) {
                             if (findParentOf(k, childGraph) === 0) { //parent of the node in the child graph is the root of the child graph
@@ -157,11 +158,13 @@ export default function Article(props) {
                     }
                 }
                 consumeLine(listLinesCount);
-            } else if (isLineImage(line)) {
+            } else if (isLineImage(line)) { //block image
                 function extractSource(input) {
-                    //TODO: allow images without title
-                    var src = input.substring(line.indexOf('(') + 1, line.indexOf('"')); //between ( and "
+                    var src = input.substring(line.indexOf('(') + 1, line.indexOf(')')); //between ( and )
                     src = src.replace(' ', ''); //remove white spaces
+                    if (src.indexOf('"') !== -1) { //if src contains "
+                        src = src.slice(0, src.indexOf('"')) //take only before "
+                    }
                     if (src.slice(0, 4) === 'http') return src //if starts with http leave as is
                     return src.slice(src.lastIndexOf('/') + 1) //otherwise take only what's after /
                 }
@@ -196,9 +199,10 @@ export default function Article(props) {
                 var lastListItemNode = null;
                 for (const i in markdown) {
                     const currentLineFirstCharacter = markdown[i][0];
-                    if (currentLineFirstCharacter !== '-' &&
-                        currentLineFirstCharacter !== '*' &&
-                        currentLineFirstCharacter !== ' ') break //if line doesn't start with - * or white space
+                    const first2Characters = markdown[i].slice(0, 2);
+                    if (first2Characters !== '- ' &&
+                        first2Characters !== '* ' &&
+                        first2Characters !== '  ') break //if line doesn't start with - * or white space
                     listLinesCount += 1;
                 }
                 for (var i = 0; i < listLinesCount; i++) { //for all of the lines that are part of the list
@@ -244,12 +248,6 @@ export default function Article(props) {
                         // console.log(childNodeType);
                         // merge it to the current graph and nodedata and nodetype
                         const newNodesToMergeCount = childGraph[0] - 1;
-                        function findParentOf(node, graph) {
-                            const LinksArray = graph.slice(2);
-                            for (var index = 1; index < LinksArray.length; index += 2) {
-                                if (LinksArray[index] === node) return LinksArray[index - 1];
-                            }
-                        }
                         var childNodesMapping = { 0: lastListItemNode };
                         for (var k = 1; k <= newNodesToMergeCount; k++) {
                             if (findParentOf(k, childGraph) === 0) { //parent of the node in the child graph is the root of the child graph
@@ -274,6 +272,47 @@ export default function Article(props) {
                 }
                 createNode('Codeblock', markdown.slice(1, codeLinesCount), rootNode)
                 consumeLine(codeLinesCount + 1);
+            } else if (line.slice(0, 2) === '> ') { //blockquote
+                var blockquoteLinesCount = 0;
+                const bqRootNode = createNode('Blockquote', 0, rootNode);
+                for (const i in markdown) {
+                    if (i > 0 && markdown[i].slice(0, 1) !== '>') break
+                    blockquoteLinesCount += 1;
+                }
+                var bqLinesArray = markdown.slice(0, blockquoteLinesCount);
+                bqLinesArray = bqLinesArray.map((value) => { //value is each unaltered line of the blockquote
+                    var out = value.slice(1); //remove first char: >
+                    //console.log(out);
+                    for (const charI in out) { //for every character in out
+                        if (out[charI] === ' ') out = out.slice(1); //remove if it's white space
+                        break //go on if it's not a white space
+                    }
+                    //console.log(out);
+                    return out
+                })
+                //console.log(bqLinesArray);
+                // throw the lines of the block quote to be parsed again
+                const G = [1, 0,]; //kantenliste
+                const nD = { 0: 0, };
+                const nT = { 0: 'root', };
+                const [childMarkdown, childGraph, childNodeData, childNodeType] = parser(bqLinesArray, G, nD, nT, h);
+                // merge it to the current graph and nodedata and nodetype
+                const newNodesToMergeCount = childGraph[0] - 1;
+                var childNodesMapping = { 0: bqRootNode };
+                for (var k = 1; k <= newNodesToMergeCount; k++) {
+                    if (findParentOf(k, childGraph) === 0) { //parent of the node in the child graph is the root of the child graph
+                        const newNode = createNode(childNodeType[k], childNodeData[k], childNodesMapping[0])
+                        childNodesMapping[k] = newNode;
+                    } else {
+                        const parentOfChild = findParentOf(k, childGraph);
+                        const newNode = createNode(childNodeType[k], childNodeData[k], childNodesMapping[parentOfChild])
+                        childNodesMapping[k] = newNode;
+                    }
+                }
+                consumeLine(blockquoteLinesCount);
+            } else if (line === '---' || line === "***") { //hr
+                createNode('Hr', 0, rootNode)
+                consumeLine(1)
             } else {
                 console.error(`Error handling line with spetial characters at line: ${line}`)
                 consumeLine(1);
@@ -300,7 +339,7 @@ export default function Article(props) {
                 return
             }
             const firstTwoCharacters = line.slice(0, 2);
-            if (newlineSpetialCharacters.includes(firstTwoCharacters) || (!isNaN(firstTwoCharacters * 1) && firstTwoCharacters !== '  ')) {
+            if (newlineSpetialCharacters.includes(firstTwoCharacters) || (isLineOlListItem(line) && firstTwoCharacters !== '  ')) {
                 handleLineWithSpetialCharacters(line, rootNode)
                 // console.log('spetial chars: ' + line)
             } else {
@@ -348,10 +387,13 @@ export default function Article(props) {
             lineCount += 1;
         }
 
+        //TODO: inline parser, take into acount the recursion 
+        //console.log(nodeData)
+
         return [markdown, graph, nodeData, nodeType, h]
     }
 
-    const [mdsrc, tree, treeContents, treeTags, histry] = parser(data.replaceAll('\t', ' ').split('\n'), G, nD, nT, { counter: 0, }); //replace all tabs with 9 spaces and create and array wheren each item is a line of the markdown document
+    const [mdsrc, tree, treeContents, treeTags, histry] = parser(data.replaceAll('\t', '  ').split('\n'), G, nD, nT, { counter: 0, }); //replace all tabs with 9 spaces and create and array wheren each item is a line of the markdown document
     console.log('🟢 Results:');
     console.log(mdsrc);
     console.log(tree);
@@ -373,9 +415,8 @@ export default function Article(props) {
         for (var i = 1; i < links.length; i += 2) {
             if (links[i - 1] === root) nodes.push(links[i])
         }
-        console.log(nodes)
+        console.log(`Child nodes being generated: ${nodes}`)
 
-        //
         const code = nodes.map((value) => { //value is the node number
             switch (nodeType[value]) {
                 case 'Title':
@@ -386,8 +427,6 @@ export default function Article(props) {
 
                 case 'listItem':
                     return <ListItem key={value} text={[nodeData[value], renderArticle(graph, nodeData, nodeType, value)]}></ListItem>
-                // console.log('ignored listItem')
-                // break;
 
                 case 'UnorderedList':
                     return <UnorderedList key={value} list={renderArticle(graph, nodeData, nodeType, value)}></UnorderedList>
@@ -410,6 +449,12 @@ export default function Article(props) {
                 case 'H4':
                     return <H4 key={value} text={nodeData[value]}></H4>
 
+                case 'Hr':
+                    return <Hr key={value}></Hr>
+
+                case 'Blockquote':
+                    return <Blockquote key={value} quote={renderArticle(graph, nodeData, nodeType, value)}></Blockquote>
+
                 case 'Small':
                     return <Small key={value} text={nodeData[value]} />
 
@@ -419,10 +464,8 @@ export default function Article(props) {
                 default:
                     console.error(`Unknown data type: ${nodeType[value]}`)
                     return <Text key={value} text={nodeData[value]}></Text>
-                    break;
             }
         })
-
         return code;
     }
 
@@ -506,10 +549,18 @@ function Codeblock(props) {
     return (
         <div className={style.code}>
             <code>
-                {props.code.map((value, index) => { return <span key={index}>{value}<br /></span>  })}
+                {props.code.map((value, index) => { return <pre key={index}>{value}<br /></pre> })}
             </code>
         </div>
     );
+}
+
+function Blockquote(props) {
+    return (
+        <blockquote className={style.bq}>
+            {props.quote}
+        </blockquote>
+    )
 }
 
 function Image(props) {
@@ -520,4 +571,8 @@ function Image(props) {
     return (
         <img src={setSrc(props.src)} alt={props.alt} title={props.title} className={style.img}></img>
     )
+}
+
+function Hr() {
+    return <hr />
 }
