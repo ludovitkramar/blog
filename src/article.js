@@ -315,6 +315,7 @@ export default function Article(props) {
                 consumeLine(1)
             } else {
                 console.error(`Error handling line with spetial characters at line: ${line}`)
+                createNode("Paragraph", line, rootNode)
                 consumeLine(1);
             }
         }
@@ -402,51 +403,122 @@ export default function Article(props) {
             console.log(`[||] couldn't find char`);
             return -1 //hasn't been found
         }
+
+        function findNextPosOfString(string, position, input) { //string is where to look, input is what to look for, position is from where start to look
+            //returns position where input starts in string after position
+            var newString = string.slice(position + 1)
+            const newStringCopy = newString
+            console.log(newString)
+            var indexOfInput = newString.indexOf(input)
+            while (newStringCopy[indexOfInput - 1] === '\\') {
+                newString = string.slice(indexOfInput + 3)
+                console.log(newString)
+                indexOfInput += newString.indexOf(input) + 1
+            }
+            if (indexOfInput < 0) return -1 //couldn't find it 
+            return indexOfInput + position + 1
+        }
+
         for (var node = 0; node < dataLength; node++) { //for every non inline node 
             const type = nodeType[node];
             const data = nodeData[node];
             if (type.slice(0, 2) !== "Il" && typeof (data) === 'string') { //if type of current node doesn't start with "Il" (inline), and the data is a string
-                console.log(`To be parsed by inline parser: ${data}`);
-                var output = "";
-                var outpuType = "IlText" //default type is inline text
-                for (var charID = 0; charID < data.length; charID++) { //for every char in the string data
-                    const c = data[charID] //the current char
-                    switch (c) {
-                        case '`':
-                            if (output.length > 0) createNode(outpuType, output, node); //console.log(`[||] created node:${createNode(outpuType, output, node)}`)
-                            //process inline code
-                            output = "";
-                            outpuType = "IlCode" //set output type
-                            const nextPosOfChar = findNextPosOfChar(data, charID, '`')
-                            //console.log('[||]' + data[nextPosOfChar]);
-                            output = data.substring(charID + 1, nextPosOfChar)
-                            //console.log('[||] output:' + output);
-                            //console.log(`[||] created node:${createNode(outpuType, output, node)}`)
-                            createNode(outpuType, output, node)
-                            charID = nextPosOfChar //skip to after code 
-                            output = ""; //reset output
-                            break;
-                        case '\\':
-                            outpuType = "IlText"
-                            output += data[charID + 1] //add next char to output
-                            charID += 1 //dont process next char
-                            break
+                function parseIlString(data, node) {
+                    console.log(`To be parsed by inline parser: ${data}`);
+                    var output = "";
+                    var outpuType = "IlText" //default type is inline text
+                    for (var charID = 0; charID < data.length; charID++) { //for every char in the string data
+                        const c = data[charID] //the current char
+                        switch (c) {
+                            case '`':
+                                //store normal text
+                                if (output.length > 0) createNode(outpuType, output, node); //console.log(`[||] created node:${createNode(outpuType, output, node)}`)
+                                output = "";
+                                //process inline code
+                                outpuType = "IlCode" //set output type
+                                const nextPosOfChar = findNextPosOfChar(data, charID, '`')
+                                //console.log('[||]' + data[nextPosOfChar]);
+                                output = data.substring(charID + 1, nextPosOfChar)
+                                //console.log('[||] output:' + output);
+                                //console.log(`[||] created node:${createNode(outpuType, output, node)}`)
+                                createNode(outpuType, output, node)
+                                charID = nextPosOfChar //skip to after code 
+                                output = ""; //reset output
+                                break;
+                            case '\\':
+                                outpuType = "IlText"
+                                output += data[charID + 1] //add next char to output
+                                charID += 1 //dont process next char
+                                break
 
-                        case '<':
-                            if (output.length > 0) console.log(`created node:${createNode(outpuType, output, node)}`)
-                            output = "";
-                            //process inline small text
-                            break
-                        default:
-                            outpuType = "IlText"
-                            output += c
-                            break;
+                            case '<':
+                                //store normal text
+                                if (output.length > 0) console.log(`created node:${createNode(outpuType, output, node)}`)
+                                output = "";
+                                if (data.substring(charID, '<small>'.length + charID) === '<small>') { //if whats found is <small>
+                                    //process inline small text
+                                    outpuType = "IlSmall"
+                                    const nextPosOfString = findNextPosOfString(data, charID, '</small>')
+                                    output = data.substring(charID + 7, nextPosOfString)
+                                    const myNode = createNode(outpuType, output, node);
+                                    parseIlString(output, myNode);
+                                    charID = nextPosOfString + 7
+                                    output = ""; //reset output
+                                    break;
+                                } else { //if whats found was nothing spetial
+                                    // process normal link, or mailto link
+                                    break;
+                                }
+                            case "*":
+                                //store normal text
+                                if (output.length > 0) console.log(`created node:${createNode(outpuType, output, node)}`)
+                                output = "";
+                                //process bold , italic or both
+                                if (data[charID + 1] === "*" && data[charID + 2] === "*") { //bold and italic
+                                    //console.log('[||] Bold and italic: ' + data)
+                                    outpuType = "IlBold";
+                                    const nextPosOfString = findNextPosOfString(data, charID, '***')
+                                    output = data.substring(charID + 3, nextPosOfString)
+                                    const boldNode = createNode(outpuType, 0, node)
+                                    outpuType = "IlItalic";
+                                    const myNode = createNode(outpuType, output, boldNode);
+                                    parseIlString(output, myNode);
+                                    charID = nextPosOfString + 2
+                                    output = ""; //reset output
+                                    break;
+                                } else if (data[charID + 1] === "*") { //bold
+                                    //console.log('[||] Bold: ' + data)
+                                    outpuType = "IlBold"
+                                    const nextPosOfString = findNextPosOfString(data, charID, '**')
+                                    output = data.substring(charID + 2, nextPosOfString)
+                                    const myNode = createNode(outpuType, output, node);
+                                    parseIlString(output, myNode);
+                                    charID = nextPosOfString + 1
+                                    output = ""; //reset output
+                                    break;
+                                } else { //italic
+                                    //console.log('[||] Italic: ' + data)
+                                    outpuType = "IlItalic" //set output type
+                                    const nextPosOfChar = findNextPosOfChar(data, charID, '*')
+                                    output = data.substring(charID + 1, nextPosOfChar)
+                                    const myNode = createNode(outpuType, output, node);
+                                    parseIlString(output, myNode);
+                                    charID = nextPosOfChar //skip to after code 
+                                    output = ""; //reset output
+                                    break;
+                                }
+                            default:
+                                outpuType = "IlText"
+                                output += c
+                                break;
+                        }
                     }
+                    if (output.length > 0) console.log(`created node:${createNode(outpuType, output, node)}`)
+                    nodeData[node] = 0;
+                    // const createdNodeID = createNode('IlText', data, node)
+                    // console.log(`created node:${createdNodeID}`)
                 }
-                if (output.length > 0) console.log(`created node:${createNode(outpuType, output, node)}`)
-                nodeData[node] = 0;
-                // const createdNodeID = createNode('IlText', data, node)
-                // console.log(`created node:${createdNodeID}`)
+                parseIlString(data, node)
             }
         }
 
@@ -488,6 +560,10 @@ export default function Article(props) {
         console.log(`Child nodes being generated: ${nodes}`)
 
         const code = nodes.map((value) => { //value is the node number
+            var data = nodeData[value]
+            if (typeof (data) === 'string') { //remove the escape character from all text
+                data = data.replaceAll('\\', '')
+            }
             switch (nodeType[value]) {
                 case 'Title':
                     return <Title key={value} text={renderArticle(graph, nodeData, nodeType, value)}></Title>
@@ -505,10 +581,10 @@ export default function Article(props) {
                     return <OrderedList key={value} list={renderArticle(graph, nodeData, nodeType, value)}></OrderedList>
 
                 case 'Codeblock':
-                    return <Codeblock key={value} code={nodeData[value]}></Codeblock>
+                    return <Codeblock key={value} code={data}></Codeblock>
 
                 case 'Image':
-                    return <Image key={value} src={nodeData[value].src} alt={nodeData[value].alt} title={nodeData[value].title}></Image>
+                    return <Image key={value} src={data.src} alt={data.alt} title={data.title}></Image>
 
                 case 'H2':
                     return <H2 key={value} text={renderArticle(graph, nodeData, nodeType, value)}></H2>
@@ -526,17 +602,23 @@ export default function Article(props) {
                     return <Blockquote key={value} quote={renderArticle(graph, nodeData, nodeType, value)}></Blockquote>
 
                 case 'IlSmall':
-                    return <IlSmall key={value} text={nodeData[value]} />
+                    return <IlSmall key={value} text={renderArticle(graph, nodeData, nodeType, value)} />
 
                 case 'IlCode':
-                    return <IlCode key={value} code={nodeData[value]} />
+                    return <IlCode key={value} code={data} />
+
+                case "IlItalic":
+                    return <IlItalic key={value} text={renderArticle(graph, nodeData, nodeType, value)} />
+
+                case "IlBold":
+                    return <IlBold key={value} text={renderArticle(graph, nodeData, nodeType, value)} />
 
                 case "IlText":
-                    return <IlText key={value} text={nodeData[value]} />
+                    return <IlText key={value} text={data} />
 
                 default:
                     console.error(`Unknown data type: ${nodeType[value]}`)
-                    return <IlText key={value} text={nodeData[value]} />
+                    return <IlText key={value} text={data} />
             }
         })
         return code;
@@ -648,4 +730,16 @@ function Image(props) {
 
 function Hr() {
     return <hr />
+}
+
+function IlItalic(props) {
+    return (
+        <i>{props.text}</i>
+    )
+}
+
+function IlBold(props) {
+    return (
+        <b>{props.text}</b>
+    )
 }
