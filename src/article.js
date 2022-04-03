@@ -42,8 +42,8 @@ export default function Article(props) {
     }
 
     const G = [1, 0,]; //kantenliste
-    const nD = { 0: 0, };
-    const nT = { 0: 'root', };
+    const nD = [0];
+    const nT = ['root'];
 
     function parser(markdown, graph, nodeData, nodeType, h) {
         const newlineSpetialCharacters = ['# ', '##', '- ', '* ', '``', '![', '--', '**', '> '];
@@ -131,8 +131,8 @@ export default function Article(props) {
                         //console.log(linesWithSpaces)
                         // parse them as another markdown document
                         const G = [1, 0,]; //kantenliste
-                        const nD = { 0: 0, };
-                        const nT = { 0: 'root', };
+                        const nD = [0];
+                        const nT = ['root'];
                         const [childMarkdown, childGraph, childNodeData, childNodeType] = parser(linesWithSpaces, G, nD, nT, h);
                         // console.log('🎗️')
                         // console.log(childGraph);
@@ -239,8 +239,8 @@ export default function Article(props) {
                         //console.log(linesWithSpaces)
                         // parse them as another markdown document
                         const G = [1, 0,]; //kantenliste
-                        const nD = { 0: 0, };
-                        const nT = { 0: 'root', };
+                        const nD = [0];
+                        const nT = ['root'];
                         const [childMarkdown, childGraph, childNodeData, childNodeType] = parser(linesWithSpaces, G, nD, nT, h);
                         // console.log('🎗️')
                         // console.log(childGraph);
@@ -293,8 +293,8 @@ export default function Article(props) {
                 //console.log(bqLinesArray);
                 // throw the lines of the block quote to be parsed again
                 const G = [1, 0,]; //kantenliste
-                const nD = { 0: 0, };
-                const nT = { 0: 'root', };
+                const nD = [0];
+                const nT = ['root'];
                 const [childMarkdown, childGraph, childNodeData, childNodeType] = parser(bqLinesArray, G, nD, nT, h);
                 // merge it to the current graph and nodedata and nodetype
                 const newNodesToMergeCount = childGraph[0] - 1;
@@ -348,15 +348,6 @@ export default function Article(props) {
             };
         }
 
-        function copyObject(input) {
-            let output = {};
-            let key;
-            for (key in input) {
-                output[key] = input[key];
-            }
-            return output;
-        }
-
         function copyArray(input) {
             let output = [];
             let key;
@@ -379,16 +370,25 @@ export default function Article(props) {
                 md: markdown,
                 currLine: markdown[0],
                 g: copyArray(graph),
-                nData: copyObject(nodeData),
-                nType: copyObject(nodeType),
+                nData: copyArray(nodeData),
+                nType: copyArray(nodeType),
             };
             h.counter += 1;
             processLine(markdown[0], 0);
             lineCount += 1;
         }
 
-        //TODO: inline parser, take into acount the recursion 
-        //console.log(nodeData)
+        //inline parser, take into acount the recursion 
+        const dataLength = nodeData.length;
+        for (var node = 0; node < dataLength; node++) {
+            const type = nodeType[node];
+            const data = nodeData[node];
+            if (type.slice(0, 2) !== "Il" && typeof (data) === 'string') { //if type of current node doesn't start with "Il" (inline), and the data is a string
+                console.log(`To be parsed by inline parser: ${data}`);
+                nodeData[node] = 0;
+                console.log(`created node:${createNode('IlText', data, node)}`)
+            }
+        }
 
         return [markdown, graph, nodeData, nodeType, h]
     }
@@ -412,21 +412,31 @@ export default function Article(props) {
         //create array nodes of every node connected to root
         var links = graph.slice(2);
         var nodes = [];
+        var inlineNodes = [];
         for (var i = 1; i < links.length; i += 2) {
-            if (links[i - 1] === root) nodes.push(links[i])
+            if (links[i - 1] === root) { //if the parent of i is the current root
+                const nodeToBeRendered = links[i] // links[i] is the node that we want to use
+                if (nodeType[nodeToBeRendered].slice(0, 2) !== 'Il') { //if this node isn't an inline node
+                    nodes.push(nodeToBeRendered)
+                } else { //is an inline node
+                    inlineNodes.push(nodeToBeRendered);
+                }
+            }
         }
+        nodes = inlineNodes.concat(nodes)
+
         console.log(`Child nodes being generated: ${nodes}`)
 
         const code = nodes.map((value) => { //value is the node number
             switch (nodeType[value]) {
                 case 'Title':
-                    return <Title key={value} text={nodeData[value]}></Title>
+                    return <Title key={value} text={renderArticle(graph, nodeData, nodeType, value)}></Title>
 
                 case 'Paragraph':
-                    return <Paragraph key={value} content={nodeData[value]}></Paragraph>
+                    return <Paragraph key={value} content={renderArticle(graph, nodeData, nodeType, value)}></Paragraph>
 
                 case 'listItem':
-                    return <ListItem key={value} text={[nodeData[value], renderArticle(graph, nodeData, nodeType, value)]}></ListItem>
+                    return <ListItem key={value} text={renderArticle(graph, nodeData, nodeType, value)}></ListItem>
 
                 case 'UnorderedList':
                     return <UnorderedList key={value} list={renderArticle(graph, nodeData, nodeType, value)}></UnorderedList>
@@ -441,13 +451,13 @@ export default function Article(props) {
                     return <Image key={value} src={nodeData[value].src} alt={nodeData[value].alt} title={nodeData[value].title}></Image>
 
                 case 'H2':
-                    return <H2 key={value} text={nodeData[value]}></H2>
+                    return <H2 key={value} text={renderArticle(graph, nodeData, nodeType, value)}></H2>
 
                 case 'H3':
-                    return <H3 key={value} text={nodeData[value]}></H3>
+                    return <H3 key={value} text={renderArticle(graph, nodeData, nodeType, value)}></H3>
 
                 case 'H4':
-                    return <H4 key={value} text={nodeData[value]}></H4>
+                    return <H4 key={value} text={renderArticle(graph, nodeData, nodeType, value)}></H4>
 
                 case 'Hr':
                     return <Hr key={value}></Hr>
@@ -455,15 +465,18 @@ export default function Article(props) {
                 case 'Blockquote':
                     return <Blockquote key={value} quote={renderArticle(graph, nodeData, nodeType, value)}></Blockquote>
 
-                case 'Small':
-                    return <Small key={value} text={nodeData[value]} />
+                case 'IlSmall':
+                    return <IlSmall key={value} text={nodeData[value]} />
 
-                case 'Code':
-                    return <Code key={value} code={nodeData[value]} />
+                case 'IlCode':
+                    return <IlCode key={value} code={nodeData[value]} />
+
+                case "IlText":
+                    return <IlText key={value} text={nodeData[value]} />
 
                 default:
                     console.error(`Unknown data type: ${nodeType[value]}`)
-                    return <Text key={value} text={nodeData[value]}></Text>
+                    return <IlText key={value} text={nodeData[value]} />
             }
         })
         return code;
@@ -527,19 +540,19 @@ function Paragraph(props) {
     );
 }
 
-function Text(props) {
+function IlText(props) {
     return (
         <span className={style.span}>{props.text}</span>
     );
 }
 
-function Small(props) {
+function IlSmall(props) {
     return (
         <small className={style.small}>{props.text}</small>
     );
 }
 
-function Code(props) {
+function IlCode(props) {
     return (
         <code className={style.code}>{props.code}</code>
     );
