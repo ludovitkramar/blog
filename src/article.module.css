@@ -58,6 +58,13 @@ div.code > * {
     font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New', monospace;
 }
 
+code.code {
+    color: var(--code-text-color);
+    background-color: var(--code-background-color);
+    border: 1px solid var(--code-border-color);
+    font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New', monospace;
+}
+
 .ol {
     margin-top: .4em;
     margin-bottom: .4em;

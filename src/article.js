@@ -380,13 +380,73 @@ export default function Article(props) {
 
         //inline parser, take into acount the recursion 
         const dataLength = nodeData.length;
-        for (var node = 0; node < dataLength; node++) {
+        const spetialInlineSymbols = ['<', '`'];
+        function findNextPosOfChar(string, position, char) {
+            //string is the string in which to find the char
+            // position is from where start to look
+            // char is what we are looking for
+
+            // \ escape character should be ignored if it is before what is being searched.
+
+            //console.log("[||] We are looking in:" + string);
+            for (var i = position + 1; i < string.length; i++) { //starting from next of position in string
+                //console.log("[||]" + string[i]);
+                const c = string[i] //current char
+                if (c === '\\') {
+                    i += 1
+                } else if (c === char) {
+                    //console.log(`[||] at ${i}, ${c} has been found`);
+                    return i //return position where next char is in string
+                }
+            }
+            console.log(`[||] couldn't find char`);
+            return -1 //hasn't been found
+        }
+        for (var node = 0; node < dataLength; node++) { //for every non inline node 
             const type = nodeType[node];
             const data = nodeData[node];
             if (type.slice(0, 2) !== "Il" && typeof (data) === 'string') { //if type of current node doesn't start with "Il" (inline), and the data is a string
                 console.log(`To be parsed by inline parser: ${data}`);
+                var output = "";
+                var outpuType = "IlText" //default type is inline text
+                for (var charID = 0; charID < data.length; charID++) { //for every char in the string data
+                    const c = data[charID] //the current char
+                    switch (c) {
+                        case '`':
+                            if (output.length > 0) createNode(outpuType, output, node); //console.log(`[||] created node:${createNode(outpuType, output, node)}`)
+                            //process inline code
+                            output = "";
+                            outpuType = "IlCode" //set output type
+                            const nextPosOfChar = findNextPosOfChar(data, charID, '`')
+                            //console.log('[||]' + data[nextPosOfChar]);
+                            output = data.substring(charID + 1, nextPosOfChar)
+                            //console.log('[||] output:' + output);
+                            //console.log(`[||] created node:${createNode(outpuType, output, node)}`)
+                            createNode(outpuType, output, node)
+                            charID = nextPosOfChar //skip to after code 
+                            output = ""; //reset output
+                            break;
+                        case '\\':
+                            outpuType = "IlText"
+                            output += data[charID + 1] //add next char to output
+                            charID += 1 //dont process next char
+                            break
+
+                        case '<':
+                            if (output.length > 0) console.log(`created node:${createNode(outpuType, output, node)}`)
+                            output = "";
+                            //process inline small text
+                            break
+                        default:
+                            outpuType = "IlText"
+                            output += c
+                            break;
+                    }
+                }
+                if (output.length > 0) console.log(`created node:${createNode(outpuType, output, node)}`)
                 nodeData[node] = 0;
-                console.log(`created node:${createNode('IlText', data, node)}`)
+                // const createdNodeID = createNode('IlText', data, node)
+                // console.log(`created node:${createdNodeID}`)
             }
         }
 
