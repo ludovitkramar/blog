@@ -45,7 +45,7 @@ export default function GraphViewer(props) {
         //console.log(matriz);
         if (!isMatrixValid(matriz)) {
             console.warn(matrix);
-            throw ('Invalid matrix, can\'t solve');
+            console.error('Invalid matrix, can\'t solve');
         }
         var x = 0;
         var y = 0;
