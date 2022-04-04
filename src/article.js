@@ -499,10 +499,24 @@ export default function Article(props) {
                                     break;
                                 }
                                 const hrefText = data.substring(startPosOfHref + 1, endPosOfHref)
-                                const linkObj = {
-                                    'href': hrefText,
-                                    'title': hrefText,
+
+                                function extractHrefTitle(input) {
+                                    var src = input;
+                                    src = src.replace(' ', ''); //remove white spaces
+                                    if (src.indexOf('"') !== -1) { //if src contains "
+                                        var h = src.slice(0, src.indexOf('"')) //take only before "
+                                        var t = src.slice(src.indexOf('"') + 1, src.lastIndexOf('"'))
+                                        return [h, t]
+                                    } else {
+                                        return [input, input]
+                                    }
                                 }
+                                const hrefTitle = extractHrefTitle(hrefText);
+                                const linkObj = {
+                                    'href': hrefTitle[0],
+                                    'title': hrefTitle[1],
+                                }
+
                                 const myNode = createNode(outpuType, linkObj, node);
                                 parseIlString(linkText, myNode)
                                 charID = endPosOfHref //skip to after code 
@@ -634,6 +648,7 @@ export default function Article(props) {
                     }
                     if (output.length > 0) createNode(outpuType, output, node) //console.log(`created node:${createNode(outpuType, output, node)}`)
                     //nodeData[node] = 0;
+                    if (nodeType[node].slice(0, 2) !== "Il") nodeData[node] = 0;
                     // const createdNodeID = createNode('IlText', data, node)
                     // console.log(`created node:${createdNodeID}`)
                 }
@@ -680,9 +695,9 @@ export default function Article(props) {
 
         const code = nodes.map((value) => { //value is the node number
             var data = nodeData[value]
-            if (typeof (data) === 'string') { //remove the escape character from all text
-                data = data.replaceAll('\\', '')
-            }
+            // if (typeof (data) === 'string') { //remove the escape character from all text
+            //     data = data.replaceAll('\\', '')
+            // }
             switch (nodeType[value]) {
                 case 'Title':
                     return <Title key={value} text={renderArticle(graph, nodeData, nodeType, value)}></Title>
@@ -751,8 +766,8 @@ export default function Article(props) {
 
     return (
         <article className={style.article}>
-            {/* <GraphViewer graph={tree} nodesData={treeContents} nodesType={treeTags} /> */}
             {renderArticle(tree, treeContents, treeTags, 0)}
+            <GraphViewer graph={tree} nodesData={treeContents} nodesType={treeTags} />
         </article>
     );
 }
@@ -872,16 +887,16 @@ function IlBold(props) {
 function IlLink(props) {
     var href = props.href;
     if (href.slice(0, 4) !== "http") {
-        if (href.indexOf('@') !== -1) { //if it has an @ , mailto
-            href = `mailto:${href}`;
-        } else if (href[0] === '#') {
+        if (href[0] === '#') {
 
+        } else if (href.indexOf('@') !== -1) {//if it has an @ , mailto
+            href = `mailto:${href}`;
         } else { //internal link to other article
             return <Link to={'/article/' + href} title={props.title}>{props.text}</Link>
         }
     }
     return (
-        <a href={href} title={props.title}>{props.text}</a>
+        <a href={href} title={props.title} target="_blank">{props.text}</a>
     )
 }
 
