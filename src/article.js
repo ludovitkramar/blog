@@ -430,6 +430,83 @@ export default function Article(props) {
                     for (var charID = 0; charID < data.length; charID++) { //for every char in the string data
                         const c = data[charID] //the current char
                         switch (c) {
+                            case '!':
+                                if (data[charID + 1] === '[') { //if next char is [
+                                    if (output.length > 0) createNode(outpuType, output, node); //store text until this point
+                                    output = "";
+                                    //process inline image
+                                    outpuType = "IlImage"
+                                    const posOfEndAltText = findNextPosOfChar(data, charID, ']')
+                                    if (posOfEndAltText === -1) {
+                                        outpuType = "IlText"
+                                        output += c
+                                        break;
+                                    }
+                                    const altText = data.substring(charID + 2, posOfEndAltText);
+                                    const startPosOfSrc = findNextPosOfChar(data, charID, '(')
+                                    if (startPosOfSrc === -1 || startPosOfSrc !== posOfEndAltText + 1) { // ( should be right after ]
+                                        outpuType = "IlText"
+                                        output += c
+                                        break;
+                                    }
+                                    const endPosOfSrc = findNextPosOfChar(data, charID, ')')
+                                    if (endPosOfSrc === -1) {
+                                        outpuType = "IlText"
+                                        output += c
+                                        break;
+                                    }
+                                    const srcText = data.substring(startPosOfSrc + 1, endPosOfSrc)
+                                    const imgObj = {
+                                        'src': srcText,
+                                        'alt': altText
+                                    }
+                                    createNode(outpuType, imgObj, node);
+                                    charID = endPosOfSrc //skip to after code 
+                                    break;
+                                } else {
+                                    //treat as normal text
+                                    outpuType = "IlText"
+                                    output += c
+                                    break;
+                                }
+                            case '[':
+                                if (output.length > 0) createNode(outpuType, output, node); //store text until this point
+                                output = "";
+                                //process inline link
+                                outpuType = "IlLink"
+                                const nextEndBracketPos = findNextPosOfChar(data, charID, ']')
+                                const nextStartBracketPos = findNextPosOfChar(data, charID, '[');
+                                var endPosLinkText = nextEndBracketPos;
+                                if (nextStartBracketPos > 0 && nextStartBracketPos < nextEndBracketPos) { //if there's an image inside the link text
+                                    endPosLinkText = findNextPosOfChar(data, nextEndBracketPos, ']')
+                                }
+                                if (endPosLinkText === -1) {
+                                    outpuType = "IlText"
+                                    output += c
+                                    break;
+                                }
+                                const linkText = data.substring(charID + 1, endPosLinkText);
+                                const startPosOfHref = findNextPosOfChar(data, endPosLinkText, '(')
+                                if (startPosOfHref === -1 || startPosOfHref !== endPosLinkText + 1) { // ( should be right after ]
+                                    outpuType = "IlText"
+                                    output += c
+                                    break;
+                                }
+                                const endPosOfHref = findNextPosOfChar(data, endPosLinkText, ')')
+                                if (endPosOfHref === -1) {
+                                    outpuType = "IlText"
+                                    output += c
+                                    break;
+                                }
+                                const hrefText = data.substring(startPosOfHref + 1, endPosOfHref)
+                                const linkObj = {
+                                    'href': hrefText,
+                                    'title': hrefText,
+                                }
+                                const myNode = createNode(outpuType, linkObj, node);
+                                parseIlString(linkText, myNode)
+                                charID = endPosOfHref //skip to after code 
+                                break;
                             case '`':
                                 //store normal text
                                 if (output.length > 0) createNode(outpuType, output, node); //console.log(`[||] created node:${createNode(outpuType, output, node)}`)
@@ -437,6 +514,11 @@ export default function Article(props) {
                                 //process inline code
                                 outpuType = "IlCode" //set output type
                                 const nextPosOfChar = findNextPosOfChar(data, charID, '`')
+                                if (nextPosOfChar === -1) {
+                                    outpuType = "IlText"
+                                    output += c
+                                    break
+                                }
                                 //console.log('[||]' + data[nextPosOfChar]);
                                 output = data.substring(charID + 1, nextPosOfChar)
                                 //console.log('[||] output:' + output);
@@ -453,12 +535,17 @@ export default function Article(props) {
 
                             case '<':
                                 //store normal text
-                                if (output.length > 0) console.log(`created node:${createNode(outpuType, output, node)}`)
+                                if (output.length > 0) createNode(outpuType, output, node) //console.log(`created node:${createNode(outpuType, output, node)}`)
                                 output = "";
                                 if (data.substring(charID, '<small>'.length + charID) === '<small>') { //if whats found is <small>
                                     //process inline small text
                                     outpuType = "IlSmall"
                                     const nextPosOfString = findNextPosOfString(data, charID, '</small>')
+                                    if (nextPosOfString === -1) {
+                                        outpuType = "IlText"
+                                        output += c
+                                        break
+                                    }
                                     output = data.substring(charID + 7, nextPosOfString)
                                     const myNode = createNode(outpuType, output, node);
                                     parseIlString(output, myNode);
@@ -467,17 +554,39 @@ export default function Article(props) {
                                     break;
                                 } else { //if whats found was nothing spetial
                                     // process normal link, or mailto link
+                                    outpuType = "IlLink" //set output type
+                                    const nextPosOfChar = findNextPosOfChar(data, charID, '>')
+                                    if (nextPosOfChar === -1) {
+                                        outpuType = "IlText"
+                                        output += c
+                                        break
+                                    }
+                                    output = data.substring(charID + 1, nextPosOfChar)
+                                    const linkObject = {
+                                        'href': output,
+                                        'title': output,
+                                    }
+                                    const myNode = createNode(outpuType, linkObject, node);
+                                    outpuType = "IlText" //set output type
+                                    createNode(outpuType, output, myNode); // the text
+                                    charID = nextPosOfChar //skip to after code 
+                                    output = ""; //reset output
                                     break;
                                 }
-                            case "*":
+                            case '*':
                                 //store normal text
-                                if (output.length > 0) console.log(`created node:${createNode(outpuType, output, node)}`)
+                                if (output.length > 0) createNode(outpuType, output, node) //console.log(`created node:${createNode(outpuType, output, node)}`)
                                 output = "";
                                 //process bold , italic or both
                                 if (data[charID + 1] === "*" && data[charID + 2] === "*") { //bold and italic
                                     //console.log('[||] Bold and italic: ' + data)
                                     outpuType = "IlBold";
                                     const nextPosOfString = findNextPosOfString(data, charID, '***')
+                                    if (nextPosOfString === -1) {
+                                        outpuType = "IlText"
+                                        output += c
+                                        break
+                                    }
                                     output = data.substring(charID + 3, nextPosOfString)
                                     const boldNode = createNode(outpuType, 0, node)
                                     outpuType = "IlItalic";
@@ -490,6 +599,11 @@ export default function Article(props) {
                                     //console.log('[||] Bold: ' + data)
                                     outpuType = "IlBold"
                                     const nextPosOfString = findNextPosOfString(data, charID, '**')
+                                    if (nextPosOfString === -1) {
+                                        outpuType = "IlText"
+                                        output += c
+                                        break
+                                    }
                                     output = data.substring(charID + 2, nextPosOfString)
                                     const myNode = createNode(outpuType, output, node);
                                     parseIlString(output, myNode);
@@ -500,6 +614,11 @@ export default function Article(props) {
                                     //console.log('[||] Italic: ' + data)
                                     outpuType = "IlItalic" //set output type
                                     const nextPosOfChar = findNextPosOfChar(data, charID, '*')
+                                    if (nextPosOfChar === -1) {
+                                        outpuType = "IlText"
+                                        output += c
+                                        break
+                                    }
                                     output = data.substring(charID + 1, nextPosOfChar)
                                     const myNode = createNode(outpuType, output, node);
                                     parseIlString(output, myNode);
@@ -513,8 +632,8 @@ export default function Article(props) {
                                 break;
                         }
                     }
-                    if (output.length > 0) console.log(`created node:${createNode(outpuType, output, node)}`)
-                    nodeData[node] = 0;
+                    if (output.length > 0) createNode(outpuType, output, node) //console.log(`created node:${createNode(outpuType, output, node)}`)
+                    //nodeData[node] = 0;
                     // const createdNodeID = createNode('IlText', data, node)
                     // console.log(`created node:${createdNodeID}`)
                 }
@@ -616,6 +735,12 @@ export default function Article(props) {
                 case "IlText":
                     return <IlText key={value} text={data} />
 
+                case "IlLink":
+                    return <IlLink key={value} href={data.href} title={data.title} text={renderArticle(graph, nodeData, nodeType, value)} />
+
+                case "IlImage":
+                    return <IlImage key={value} src={data.src} alt={data.alt}></IlImage>
+
                 default:
                     console.error(`Unknown data type: ${nodeType[value]}`)
                     return <IlText key={value} text={data} />
@@ -626,7 +751,7 @@ export default function Article(props) {
 
     return (
         <article className={style.article}>
-            <GraphViewer graph={tree} nodesData={treeContents} nodesType={treeTags} />
+            {/* <GraphViewer graph={tree} nodesData={treeContents} nodesType={treeTags} /> */}
             {renderArticle(tree, treeContents, treeTags, 0)}
         </article>
     );
@@ -741,5 +866,27 @@ function IlItalic(props) {
 function IlBold(props) {
     return (
         <b>{props.text}</b>
+    )
+}
+
+function IlLink(props) {
+    var href = props.href;
+    if (href.slice(0, 4) !== "http") {
+        if (href.indexOf('@') !== -1) { //if it has an @ , mailto
+            href = `mailto:${href}`;
+        } else if (href[0] === '#') {
+
+        } else { //internal link to other article
+            return <Link to={'/article/' + href} title={props.title}>{props.text}</Link>
+        }
+    }
+    return (
+        <a href={href} title={props.title}>{props.text}</a>
+    )
+}
+
+function IlImage(props) {
+    return (
+        <img className={style.IlImage} src={props.src} alt={props.alt}></img>
     )
 }
