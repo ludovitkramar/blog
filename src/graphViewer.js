@@ -241,6 +241,7 @@ export default function GraphViewer(props) {
         const frictionFactor = 1.2;
         const antigravityFactor = 0.01;
         const springFactor = 5;
+        const maxVelocity = 200;
         var accelArray = [];
         var velArray = velocities;
         var linesArray = lines;
@@ -337,8 +338,15 @@ export default function GraphViewer(props) {
             const cVy = currentV[1];
             const cAx = acclVector[0];
             const cAy = acclVector[1];
-            const Vx = cVx + cAx * timeStep;
-            const Vy = cVy + cAy * timeStep;
+            var Vx = cVx + cAx * timeStep;
+            var Vy = cVy + cAy * timeStep;
+            //set max velocity
+            const speed = vectorLength([Vx, Vy])
+            if (speed > maxVelocity) {
+                const factor = maxVelocity / speed;
+                Vx = Vx * factor;
+                Vy = Vy * factor;
+            }
             velArray[nodeID] = [Vx, Vy]
         })
 
