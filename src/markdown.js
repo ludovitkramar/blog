@@ -252,7 +252,11 @@ export default function Markdown(props) {
                         if (i > 0 && markdown[i].slice(0, 3) === '```') break //if not first line and line starts with ```
                         codeLinesCount += 1;
                     }
-                    createNode('Codeblock', markdown.slice(1, codeLinesCount), rootNode)
+                    var codeLines = markdown.slice(1, codeLinesCount);
+                    for (const line in codeLines) {
+                        if (codeLines[line].slice(0, 4) === "\\```") codeLines[line] = codeLines[line].slice(1);
+                    }
+                    createNode('Codeblock', codeLines, rootNode)
                     consumeLine(codeLinesCount + 1);
                 } else if (line.slice(0, 2) === '> ') { //blockquote
                     var blockquoteLinesCount = 0;
@@ -517,6 +521,13 @@ export default function Markdown(props) {
                                     }
                                     //console.log('[||]' + data[nextPosOfChar]);
                                     output = data.substring(charID + 1, nextPosOfChar)
+                                    const outLength = output.length
+                                    const lastTwoChars = output.substring(outLength - 2, outLength)
+                                    if (lastTwoChars === '\\\\') { //escaped escape char before the end of code sample
+                                        output = output.slice(0, outLength - 1)
+                                    }
+                                    output = output.replaceAll('\\`', '`')
+                                    output = output.replaceAll('\\\\`', '\\`')
                                     //console.log('[||] output:' + output);
                                     //console.log(`[||] created node:${createNode(outpuType, output, node)}`)
                                     createNode(outpuType, output, node)
