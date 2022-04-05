@@ -26,14 +26,14 @@
 @media (prefers-color-scheme: dark) {
     .article {
         --text-color: rgb(228, 228, 228);
-        --article-background-color: rgb(39, 39, 39);
+        --article-background-color: rgb(20, 20, 20);
         --code-text-color: rgb(202, 202, 202);
         --code-background-color: rgb(63, 63, 63);
         --code-border-color: rgb(77, 77, 77);
         --title-text-color: rgb(57, 139, 246);
-        --link-text-color: rgb(40, 141, 204);
+        --link-text-color: rgb(145, 206, 244);
         --link-hover-color: rgb(78, 168, 225);
-        --bq-highlight: rgb(0, 110, 255);
+        --bq-highlight: rgb(38, 83, 143);
         --bq-background: rgb(0, 0, 0);
     }
 }
