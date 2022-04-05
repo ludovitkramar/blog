@@ -1,46 +1,7 @@
-.article {
-    --text-color: rgb(39, 39, 39);
-    --article-background-color: white;
-    --code-text-color: rgb(88, 88, 88);
-    --code-background-color: rgb(246, 246, 246);
-    --code-border-color: #bbb;
-    --list-item-text-color: rgb(61, 61, 61);
-    --small-text-color: rgb(153, 153, 153);
-    --title-text-color: rgb(20, 97, 197);
-    --link-text-color: rgb(89, 160, 204);
-    --link-hover-color: rgb(107, 178, 223);
-    color: var(--text-color);
-    margin: 0 auto;
-    margin-top: 1em;
-    margin-bottom: 1em;
-    max-width: 800px;
-    padding: 1em;
-    background-color: var(--article-background-color);
-    /* animation-name: appear;
-    animation-duration: .4s;
-    animation-timing-function: cubic-bezier(0.075, 0.82, 0.165, 1); */
-}
-
-@keyframes appear {
-    0% {
-        opacity: 0;
-        transform: scale(.9);
-    }
-
-    100% {
-        opacity: 1;
-        transform: scale(1);
-    }
-}
-
 .p {
     color: var(--text-color);
     margin-bottom: .4em;
     margin-top: .4em;
-}
-
-.span {
-    color: var(--text-color);
 }
 
 div.code {
@@ -76,12 +37,11 @@ code.code {
 }
 
 .li {
-    color: var(--list-item-text-color);
     line-height: 1.5em;
 }
 
 .small {
-    color: var(--small-text-color);
+    opacity: .7;
 }
 
 .h1 {
@@ -124,26 +84,12 @@ code.code {
 }
 
 .bq {
-    border: 1px solid grey;
-    border-left: 10px solid grey;
+    border-left: 3px solid var(--bq-highlight);
+    box-shadow: 0px 0px 6px -4px black, 0px 0px 3px -1px black;
+    border-radius: 8px;
     margin: .4em;
     margin-left: 1em;
     padding: .5em;
     padding-left: .8em;
-    background-color: rgb(245, 245, 245);
-}
-
-@media (prefers-color-scheme: dark) {
-.article {
-    --text-color: rgb(228, 228, 228);
-    --article-background-color: rgb(39, 39, 39);
-    --code-text-color: rgb(202, 202, 202);
-    --code-background-color: rgb(63, 63, 63);
-    --code-border-color: rgb(77, 77, 77);
-    --list-item-text-color: rgb(185, 185, 185);
-    --small-text-color: rgb(117, 117, 117);
-    --title-text-color: rgb(57, 139, 246);
-    --link-text-color: rgb(109, 190, 240);
-    --link-hover-color: rgb(141, 211, 255);
-}
+    background-color: var(--bq-background);
 }

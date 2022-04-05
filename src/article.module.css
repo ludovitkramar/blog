@@ -1,19 +1,21 @@
 .article {
     --text-color: rgb(39, 39, 39);
     --article-background-color: white;
-    --code-text-color: rgb(88, 88, 88);
-    --code-background-color: rgb(246, 246, 246);
-    --code-border-color: #bbb;
-    --list-item-text-color: rgb(61, 61, 61);
-    --small-text-color: rgb(153, 153, 153);
+    --code-text-color: rgb(49, 50, 51);
+    --code-background-color: rgb(234, 242, 246);
+    --code-border-color: rgb(212, 216, 219);
     --title-text-color: rgb(20, 97, 197);
-    --link-text-color: rgb(89, 160, 204);
-    --link-hover-color: rgb(107, 178, 223);
+    --link-text-color: rgb(40, 141, 204);
+    --link-hover-color: rgb(78, 168, 225);
+    --bq-highlight: rgb(0, 110, 255);
+    --bq-background: rgb(249, 253, 255);
     color: var(--text-color);
     margin: 0 auto;
     margin-top: 1em;
     margin-bottom: 1em;
-    max-width: 800px;
+    max-width: 1000px;
+    box-shadow: 0px 0px 10px -6px #000000dd, 0px 0px 3px -1px black;
+    border-radius: .5em;
     padding: 1em;
     background-color: var(--article-background-color);
     /* animation-name: appear;
@@ -28,10 +30,10 @@
         --code-text-color: rgb(202, 202, 202);
         --code-background-color: rgb(63, 63, 63);
         --code-border-color: rgb(77, 77, 77);
-        --list-item-text-color: rgb(185, 185, 185);
-        --small-text-color: rgb(117, 117, 117);
         --title-text-color: rgb(57, 139, 246);
-        --link-text-color: rgb(109, 190, 240);
-        --link-hover-color: rgb(141, 211, 255);
+        --link-text-color: rgb(40, 141, 204);
+        --link-hover-color: rgb(78, 168, 225);
+        --bq-highlight: rgb(0, 110, 255);
+        --bq-background: rgb(0, 0, 0);
     }
 }

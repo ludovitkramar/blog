@@ -10,7 +10,7 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background-color: #dddddd;
+  background-color: #e2ecf3;
 }
 
 @media (prefers-color-scheme: dark) {

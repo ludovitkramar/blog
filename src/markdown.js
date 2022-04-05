@@ -894,18 +894,18 @@ function Image(props) {
 }
 
 function Hr() {
-    return <hr />
+    return <hr className={style.hr} />
 }
 
 function IlItalic(props) {
     return (
-        <i>{props.text}</i>
+        <i className={style.i}>{props.text}</i>
     )
 }
 
 function IlBold(props) {
     return (
-        <b>{props.text}</b>
+        <b className={style.b}>{props.text}</b>
     )
 }
 
@@ -917,11 +917,11 @@ function IlLink(props) {
         } else if (href.indexOf('@') !== -1) {//if it has an @ , mailto
             href = `mailto:${href}`;
         } else { //internal link to other article
-            return <Link to={'/article/' + href} title={props.title}>{props.text}</Link>
+            return <Link to={'/article/' + href} title={props.title} className={style.a}>{props.text}</Link>
         }
     }
     return (
-        <a href={href} title={props.title} target="_blank" rel="noreferrer">{props.text}</a>
+        <a href={href} title={props.title} target="_blank" rel="noreferrer" className={style.a}>{props.text}</a>
     )
 }
 
