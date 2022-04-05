@@ -38,15 +38,14 @@ export default function Markdown(props) {
             }
 
             function isLineImage(line) {
-                var isImage = true;
-                if (line.slice(0, 2) !== '![') isImage = false //if starts with ![
+                if (line.slice(0, 2) !== '![') return false //if starts with ![
                 //bellow checks order of things
-                if (line.indexOf('!') > line.indexOf('[')) isImage = false;
-                if (line.indexOf('[') > line.indexOf(']')) isImage = false;
-                if (line.indexOf(']') > line.indexOf('(')) isImage = false;
-                if (line.indexOf('(') > line.indexOf(')')) isImage = false;
-                if (line.slice(line.indexOf(')')) !== ')') isImage = false; //if there's anything after )
-                return isImage
+                if (line.indexOf('!') > line.indexOf('[')) return false;
+                if (line.indexOf('[') > line.indexOf(']')) return false;
+                if (line.indexOf(']') > line.indexOf('(')) return false;
+                if (line.indexOf('(') > line.indexOf(')')) return false;
+                if (line.slice(line.indexOf(')')) !== ')') return false; //if there's anything after )
+                return true
             }
 
             function isLineHeading(beforeFirstWhiteSpace) {
@@ -442,10 +441,26 @@ export default function Markdown(props) {
                                             break;
                                         }
                                         const srcText = data.substring(startPosOfSrc + 1, endPosOfSrc)
+                                        function extractsrcTitle(input) {
+                                            var src = input;
+                                            src = src.replace(' ', ''); //remove white spaces
+                                            if (src.indexOf('"') !== -1) { //if src contains "
+                                                var h = src.slice(0, src.indexOf('"')) //take only before "
+                                                var t = src.slice(src.indexOf('"') + 1, src.lastIndexOf('"'))
+                                                if (h.slice(0, 4) === 'http') return [h, t]
+                                                h = h.slice(h.lastIndexOf('/') + 1)
+                                                return [h, t]
+                                            } else {
+                                                return [input, null]
+                                            }
+                                        }
+                                        const srcTitle = extractsrcTitle(srcText);
                                         const imgObj = {
-                                            'src': srcText,
+                                            'src': srcTitle[0],
+                                            'title': srcTitle[1],
                                             'alt': altText
                                         }
+
                                         createNode(outpuType, imgObj, node);
                                         charID = endPosOfSrc //skip to after code 
                                         break;
@@ -758,7 +773,7 @@ export default function Markdown(props) {
                     return <IlLink key={value} href={data.href} title={data.title} text={renderMarkdown(graph, nodeData, nodeType, value)} />
 
                 case "IlImage":
-                    return <IlImage key={value} src={data.src} alt={data.alt}></IlImage>
+                    return <IlImage key={value} src={data.src} alt={data.alt} title={data.title}></IlImage>
 
                 default:
                     console.error(`Unknown data type: ${nodeType[value]}`)
@@ -911,7 +926,11 @@ function IlLink(props) {
 }
 
 function IlImage(props) {
+    function setSrc(src) {
+        if (src.slice(0, 7) === "http://" || src.slice(0, 8) === "https://") return src
+        return `${settings.mediaURL}/${src}`
+    }
     return (
-        <img className={style.IlImage} src={props.src} alt={props.alt}></img>
+        <img src={setSrc(props.src)} alt={props.alt} title={props.title} className={style.IlImage}></img>
     )
 }
