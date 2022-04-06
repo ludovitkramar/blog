@@ -8,6 +8,7 @@
     --link-text-color: rgb(40, 141, 204);
     --link-hover-color: rgb(78, 168, 225);
     --link-active-color: rgb(192, 241, 255);
+    --link-visited-color: rgb(117, 93, 222);
     --bq-highlight: rgb(0, 110, 255);
     --bq-background: rgb(249, 253, 255);
     color: var(--text-color);
@@ -35,6 +36,7 @@
         --link-text-color: rgb(145, 206, 244);
         --link-hover-color: rgb(78, 168, 225);
         --link-active-color: rgb(10, 59, 73);
+        --link-visited-color: rgb(165, 149, 238);
         --bq-highlight: rgb(38, 83, 143);
         --bq-background: rgb(0, 0, 0);
     }

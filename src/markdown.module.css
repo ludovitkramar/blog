@@ -103,6 +103,10 @@ code.code {
     background-color: var(--link-active-color);
 }
 
+.a:visited {
+    color: var(--link-visited-color);
+}
+
 .img {
     max-height: 300px;
     display: block;

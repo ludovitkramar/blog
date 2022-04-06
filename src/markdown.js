@@ -913,7 +913,7 @@ function IlLink(props) {
     var href = props.href;
     if (href.slice(0, 4) !== "http") {
         if (href[0] === '#') {
-
+            return <a href={href} title={props.title} className={style.a}>{props.text}</a>
         } else if (href.indexOf('@') !== -1) {//if it has an @ , mailto
             href = `mailto:${href}`;
         } else { //internal link to other article
