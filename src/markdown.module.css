@@ -1,64 +1,91 @@
+@import url('https://fonts.googleapis.com/css2?family=Inconsolata&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=STIX+Two+Text:ital,wght@0,400;0,600;1,400;1,600&display=swap');
+
 .p {
     color: var(--text-color);
-    margin-bottom: .4em;
-    margin-top: .4em;
+    margin-bottom: .3rem;
+    margin-top: .3rem;
+    font-size: 14px;
+    font-family: 'STIX Two Text', serif;
+    line-height: 20px;
 }
 
 div.code {
     color: var(--code-text-color);
     background-color: var(--code-background-color);
     border: 1px solid var(--code-border-color);
-    padding: .2em;
-    line-height: 1.2em;
-    font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New', monospace;
+    border-radius: 7px;
+    padding: .2rem;
+    line-height: 20px;
     overflow-x: auto;
 }
 
-div.code > * {
+div.code > code > pre {
     color: var(--code-text-color);
-    font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New', monospace;
+    font-size: 14px;
+    font-family: 'Inconsolata', monospace;
 }
 
 code.code {
     color: var(--code-text-color);
     background-color: var(--code-background-color);
     border: 1px solid var(--code-border-color);
-    font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New', monospace;
+    font-family: 'Inconsolata', monospace;
+    border-radius: 7px;
+    padding-left: 5px;
+    padding-right: 5px;
+    padding-bottom: 1px;
 }
 
 .ol {
-    margin-top: .4em;
-    margin-bottom: .4em;
+    margin-top: .4rem;
+    margin-bottom: .4rem;
+    font-size: 14px;
+    padding-left: 1.5rem;
 }
 
 .ul {
-    margin-top: .4em;
-    margin-bottom: .4em;
+    margin-top: .4rem;
+    margin-bottom: .4rem;
+    font-size: 14px;
+    padding-left: 1.5rem;
 }
 
 .li {
-    line-height: 1.5em;
+    line-height: 1.4rem;
+    font-family: 'STIX Two Text', serif;
 }
 
 .small {
     opacity: .7;
+    font-family: 'STIX Two Text', serif;
 }
 
 .h1 {
     color: var(--title-text-color);
-    font-size: 2rem;
+    font-size: 30px;
+    font-family: 'STIX Two Text', serif;
+    font-weight: 600;
 }
 
 .h2 {
-    font-size: 1.5rem;
+    font-size: 22px;
+    font-family: 'STIX Two Text', serif;
+    padding-top: 4px;
 }
 
 .h3 {
-    font-size: 1.2rem;
+    font-size: 17px;
+    font-family: 'STIX Two Text', serif;
+    padding-top: 2px;
+    padding-bottom: 2px;
 }
 
 .h4 {
-    font-size: 1.1rem;
+    font-size: 15px;
+    font-family: 'STIX Two Text', serif;
+    padding-top: 2px;
+    padding-bottom: 2px;
 }
 
 .a {
@@ -68,6 +95,12 @@ code.code {
 .a:hover {
     color: var(--link-hover-color);
     text-decoration: none;
+}
+
+.a:active {
+    color: var(--link-hover-color);
+    text-decoration: none;
+    background-color: var(--link-active-color);
 }
 
 .img {
@@ -88,8 +121,16 @@ code.code {
     box-shadow: 0px 0px 6px -4px black, 0px 0px 3px -1px black;
     border-radius: 8px;
     margin: .4em;
-    margin-left: 1em;
-    padding: .5em;
-    padding-left: .8em;
+    margin-left: .3em;
+    padding: .4em;
     background-color: var(--bq-background);
+}
+
+.hr {
+    border-width: 0px;
+    border-bottom: 1px solid grey;
+    width: 100%;
+    margin: 0 auto;
+    margin-top: 11px;
+    margin-bottom: 12px;
 }

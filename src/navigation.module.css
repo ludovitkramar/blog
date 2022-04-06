@@ -1,4 +1,7 @@
-  .nav {
+@import url('https://fonts.googleapis.com/css2?family=Red+Hat+Display:wght@400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter&display=swap');
+
+.nav {
     background-color: rgb(0, 0, 0);
     --navbar-thickness: 2.4em;
     box-shadow: 0px 0px 10px -3px #000000dd, 0px 0px 3px -1px black;
@@ -26,6 +29,9 @@
     padding-left: 1em;
     padding-right: 1em;
     transition: .1s;
+    font-weight: 400;
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
   }
   
   .nav > ul > li > a:hover {
@@ -60,9 +66,12 @@
     /* margin-right: .2em; */
     font-size: 1.6em;
     font-weight: 600;
+    font-family: 'Red Hat Display', sans-serif;
   }
 
   div.logo > :last-child {
     color: rgb(163, 204, 255);
     font-size: 1.6em;
+    font-weight: 400;
+    font-family: 'Red Hat Display', sans-serif;
   }
