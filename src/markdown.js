@@ -648,6 +648,79 @@ export default function Markdown(props) {
                                         output = ""; //reset output
                                         break;
                                     }
+                                case '=': //mark text
+                                    if (data[charID + 1] === "=") {
+                                        //store normal text
+                                        if (output.length > 0) createNode(outpuType, output, node) //console.log(`created node:${createNode(outpuType, output, node)}`)
+                                        output = "";
+                                        outpuType = "IlMark"
+                                        const nextPosOfString = findNextPosOfString(data, charID, '==')
+                                        if (nextPosOfString === -1) {
+                                            outpuType = "IlText"
+                                            output += c
+                                            break
+                                        }
+                                        output = data.substring(charID + 2, nextPosOfString)
+                                        const myNode = createNode(outpuType, output, node);
+                                        parseIlString(output, myNode);
+                                        charID = nextPosOfString + 1
+                                        output = ""; //reset output
+                                        break;
+                                    } else {
+                                        outpuType = "IlText"
+                                        output += c
+                                        break;
+                                    }
+                                case '~': //strikethrough or subscript
+                                    //store normal text
+                                    if (output.length > 0) createNode(outpuType, output, node)
+                                    output = "";
+                                    if (data[charID + 1] === "~") { //strikethrough
+                                        outpuType = "IlStrikethrough"
+                                        const nextPosOfString = findNextPosOfString(data, charID, '~~')
+                                        if (nextPosOfString === -1) {
+                                            outpuType = "IlText"
+                                            output += c
+                                            break
+                                        }
+                                        output = data.substring(charID + 2, nextPosOfString)
+                                        const myNode = createNode(outpuType, output, node);
+                                        parseIlString(output, myNode);
+                                        charID = nextPosOfString + 1
+                                        output = ""; //reset output
+                                        break;
+                                    } else { //italic
+                                        outpuType = "IlSubscript" //set output type
+                                        const nextPosOfChar = findNextPosOfChar(data, charID, '~')
+                                        if (nextPosOfChar === -1) {
+                                            outpuType = "IlText"
+                                            output += c
+                                            break
+                                        }
+                                        output = data.substring(charID + 1, nextPosOfChar)
+                                        const myNode = createNode(outpuType, output, node);
+                                        parseIlString(output, myNode);
+                                        charID = nextPosOfChar //skip to after code 
+                                        output = ""; //reset output
+                                        break;
+                                    }
+                                case '^':
+                                    //store normal text
+                                    if (output.length > 0) createNode(outpuType, output, node)
+                                    output = "";
+                                    outpuType = "IlSuperscript" //set output type
+                                    const nextPosOfChar2 = findNextPosOfChar(data, charID, '^')
+                                    if (nextPosOfChar2 === -1) {
+                                        outpuType = "IlText"
+                                        output += c
+                                        break
+                                    }
+                                    output = data.substring(charID + 1, nextPosOfChar2)
+                                    const myNode2 = createNode(outpuType, output, node);
+                                    parseIlString(output, myNode2);
+                                    charID = nextPosOfChar2 //skip to after code 
+                                    output = ""; //reset output
+                                    break;
                                 default:
                                     outpuType = "IlText"
                                     output += c
@@ -775,6 +848,18 @@ export default function Markdown(props) {
                 case "IlImage":
                     return <IlImage key={value} src={data.src} alt={data.alt} title={data.title}></IlImage>
 
+                case "IlMark":
+                    return <IlMark key={value} text={renderMarkdown(graph, nodeData, nodeType, value)} />
+
+                case "IlSubscript":
+                    return <IlSubscript key={value} text={renderMarkdown(graph, nodeData, nodeType, value)} />
+
+                case "IlSuperscript":
+                    return <IlSuperscript key={value} text={renderMarkdown(graph, nodeData, nodeType, value)} />
+
+                case "IlStrikethrough":
+                    return <IlStrikethrough key={value} text={renderMarkdown(graph, nodeData, nodeType, value)} />
+
                 default:
                     console.error(`Unknown data type: ${nodeType[value]}`)
                     return <IlText key={value} text={data} />
@@ -899,13 +984,13 @@ function Hr() {
 
 function IlItalic(props) {
     return (
-        <i className={style.i}>{props.text}</i>
+        <em className={style.i}>{props.text}</em>
     )
 }
 
 function IlBold(props) {
     return (
-        <b className={style.b}>{props.text}</b>
+        <strong className={style.b}>{props.text}</strong>
     )
 }
 
@@ -932,5 +1017,29 @@ function IlImage(props) {
     }
     return (
         <img src={setSrc(props.src)} alt={props.alt} title={props.title} className={style.IlImage}></img>
+    )
+}
+
+function IlMark(props) {
+    return (
+        <mark className={style.mark}>{props.text}</mark>
+    )
+}
+
+function IlStrikethrough(props) {
+    return (
+        <s className={style.strike}>{props.text}</s>
+    )
+}
+
+function IlSubscript(props) {
+    return (
+        <sub className={style.sub}>{props.text}</sub>
+    )
+}
+
+function IlSuperscript(props) {
+    return (
+        <sup className={style.sup}>{props.text}</sup>
     )
 }
