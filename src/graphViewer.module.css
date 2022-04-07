@@ -40,6 +40,9 @@ input.range {
     top: 100px;
     user-select: none;
     cursor: default;
+    font-family: 'Inconsolata', monospace;
+    font-size: 14px;
+    line-height: 20px;
 }
 
 .node:hover {
