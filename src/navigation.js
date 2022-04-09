@@ -1,5 +1,6 @@
 import { Outlet, Link } from "react-router-dom";
 import style from './navigation.module.css';
+import { useState } from "react";
 
 function convertText(text) {
   var title = text.replaceAll('_', " ")
@@ -41,25 +42,31 @@ export default function Nav(props) {
   );
 }
 
+
+function genListItems(items) { //tiems is an array
+  var output = []
+  items.forEach((element, index) => {
+    if (typeof (element) === 'string') { //is string
+      output.push(<li key={index}><Link to={'/article/' + element}>{convertText(element)}</Link></li>)
+    } else {
+      output.push(<SubMenu key={index} array={element}></SubMenu>) //assume the current element is an array and create submenu
+    }
+  });
+  return output
+}
+
 function SubMenu(props) {
+  const [open, setOpen] = useState(false)
   const array = props.array.slice(1);
   const submenuName = props.array[0];
-  function genList(list) { //list is an array
-    var output = []
-    list.forEach((element, index) => {
-      if (typeof (element) === 'string') { //is string
-        output.push(<li key={index}><Link to={'/article/' + element}>{convertText(element)}</Link></li>)
-      } else {
-        output.push(<SubMenu array={element} key={index}></SubMenu>) //assume the current element is an array and create submenu
-      }
-    });
-    return output
-  }
   return (
     <div className={style.subMenu}>
-      <span>{submenuName}</span>
+      <span onClick={() => { setOpen(!open) }}>
+        {open ? ' - ' : ' + '}
+        {submenuName}
+      </span>
       <ul>
-        {genList(array)}
+        {open ? genListItems(array) : null}
       </ul>
     </div>
   )
@@ -68,17 +75,6 @@ function SubMenu(props) {
 function CategoryMenu(props) {
   const array = props.array.slice(1);
   const categoryName = props.array[0];
-  function genListItems(items) { //tiems is an array
-    var output = []
-    items.forEach((element, index) => {
-      if (typeof (element) === 'string') { //is string
-        output.push(<li key={index}><Link to={'/article/' + element}>{convertText(element)}</Link></li>)
-      } else {
-        output.push(<SubMenu key={index} array={element}></SubMenu>) //assume the current element is an array and create submenu
-      }
-    });
-    return output
-  }
   return (
     <li><div className={style.menuBox}>
       <span>{categoryName}</span>

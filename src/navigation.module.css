@@ -87,6 +87,7 @@
 
   div.menuBox {
     position: relative;
+    white-space: nowrap;
   }
 
   div.menuBox > span {
@@ -115,12 +116,19 @@
   }
 
   ul.menuBox {
-    display: none;
+    display: block;
     position: absolute;
     background-color: yellowgreen;
     list-style: none;
     margin: 0;
     padding: .2em;
+    min-width: 150px;
+    left: 0px;
+    max-width: 80vw;
+    max-height: 80vh;
+    overflow-y: auto;
+    overflow-x: hidden;
+    text-overflow: ellipsis;
   }
 
   ul.menuBox > li {
@@ -132,10 +140,17 @@
     background-color: lightgoldenrodyellow;
   }
 
+  div.subMenu > span {
+    padding: .5em;
+    display: inline-block;
+    cursor: pointer;
+    background-color: lightgrey;
+  }
+
   div.subMenu > ul {
     list-style: none;
     margin: 0;
-    padding: .2em;
+    padding-left: .5em;
     background-color: lightcoral;
   }
 
