@@ -1,7 +1,16 @@
 .nav {
     background-color: rgb(0, 0, 0);
     --navbar-thickness: 2.4em;
+    --text-1: #ffffff;
+    --text-2: rgb(163, 204, 255);
+    --color-1: rgb(0, 110, 255);
+    --color-2: rgb(0, 82, 189);
+    --bg-1: rgb(39, 39, 39, 0);
     box-shadow: 0px 0px 10px -3px #000000dd, 0px 0px 3px -1px black;
+    user-select: none;
+    font-weight: 400;
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
   }
   
   .nav > ul {
@@ -17,9 +26,9 @@
   
   .nav > ul > li > a {
     display: inline-block;
-    color: white;
+    color: var(--text-1);
     height: 100%;
-    background-color: rgb(39, 39, 39, 0);
+    background-color: var(--bg-1);
     border-radius: 2em;
     text-decoration: none;
     line-height: var(--navbar-thickness);
@@ -32,17 +41,20 @@
   }
   
   .nav > ul > li > a:hover {
-    background-color: rgb(0, 110, 255);
+    background-color: var(--color-1);
   }
   
   .nav > ul > li > a:active {
-    background-color: rgb(0, 82, 189);
+    background-color: var(--color-2);
     box-shadow: inset 0px 0px 10px -2px black, inset 0px 0px 3px 0px black;
     transform: scale(0.98);
   }
 
   div.head {
     background: linear-gradient(90deg, rgb(0, 58, 134), rgb(52, 140, 255));
+    --text-1: #ffffff;
+    --text-2: rgb(163, 204, 255);
+    user-select: none;
   }
 
   div.head > a {
@@ -59,7 +71,7 @@
   }
 
   div.logo > :first-child {
-    color: white;
+    color: var(--text-1);
     /* margin-right: .2em; */
     font-size: 1.6em;
     font-weight: 600;
@@ -67,8 +79,67 @@
   }
 
   div.logo > :last-child {
-    color: rgb(163, 204, 255);
+    color: var(--text-2);
     font-size: 1.6em;
     font-weight: 400;
     font-family: 'Red Hat Display', sans-serif;
+  }
+
+  div.menuBox {
+    position: relative;
+  }
+
+  div.menuBox > span {
+    display: inline-block;
+    color: var(--text-1);
+    height: 100%;
+    background-color: var(--bg-1);
+    border-radius: 2em;
+    text-decoration: none;
+    line-height: var(--navbar-thickness);
+    padding-left: 1em;
+    padding-right: 1em;
+    transition: .1s;
+    font-weight: 400;
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    cursor: default;
+  }
+
+  div.menuBox:hover > ul {
+    display: block;
+  }
+
+  div.menuBox:hover > span {
+    background-color: var(--color-1);
+  }
+
+  ul.menuBox {
+    display: none;
+    position: absolute;
+    background-color: yellowgreen;
+    list-style: none;
+    margin: 0;
+    padding: .2em;
+  }
+
+  ul.menuBox > li {
+    padding: .5em;
+    background-color: antiquewhite;
+  }
+
+  div.subMenu {
+    background-color: lightgoldenrodyellow;
+  }
+
+  div.subMenu > ul {
+    list-style: none;
+    margin: 0;
+    padding: .2em;
+    background-color: lightcoral;
+  }
+
+  div.subMenu > ul > li {
+    padding: .5em;
+    background-color: lightblue;
   }
