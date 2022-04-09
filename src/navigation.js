@@ -33,7 +33,7 @@ export default function Nav(props) {
       </Link></div>
       <nav className={style.nav}>
         <ul>
-          <CategoryMenu array={['Category', 'item1', 'item2', ['subMenu', 'sub1', 'sub2', ['subMenu2', 'xyz']], 'item3']}></CategoryMenu>
+          <CategoryMenu array={['Category', ['Category', 'item1', 'item2', ['subMenu', 'sub1', 'sub2', ['subMenu2', 'xyz', 'WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW']], 'item3'], ['Category', 'item1', 'item2', ['subMenu', 'sub1', 'sub2', ['subMenu2', 'xyz']], 'item3'], ['Category', 'item1', 'item2', ['subMenu', 'sub1', 'sub2', ['subMenu2', 'xyz']], 'item3'], ['Category', 'item1', 'item2', ['subMenu', 'sub1', 'sub2', ['subMenu2', 'xyz']], 'item3'], 'item1', 'item2', ['subMenu', 'sub1', 'sub2', ['subMenu2', 'xyz']], 'item3']}></CategoryMenu>
           {mapArticles(props.articlesList)}
         </ul>
       </nav>
@@ -65,22 +65,21 @@ function SubMenu(props) {
         {open ? ' - ' : ' + '}
         {submenuName}
       </span>
-      <ul>
-        {open ? genListItems(array) : null}
-      </ul>
+      {open ? <ul>{genListItems(array)}</ul> : null}
     </div>
   )
 }
 
 function CategoryMenu(props) {
+  const [open, setOpen] = useState(false)
   const array = props.array.slice(1);
   const categoryName = props.array[0];
   return (
-    <li><div className={style.menuBox}>
-      <span>{categoryName}</span>
-      <ul className={style.menuBox}>
-        {genListItems(array)}
-      </ul>
-    </div></li>
+    <li>
+      <div className={open ? style.activeMenuBox + " " + style.menuBox : style.menuBox}>
+        <span onClick={() => { setOpen(!open) }}>{categoryName}</span>
+        {open ? <ul className={style.menuBox}>{genListItems(array)}</ul> : null}
+      </div>
+    </li>
   )
 }

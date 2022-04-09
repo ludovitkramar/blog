@@ -1,160 +1,205 @@
 .nav {
-    background-color: rgb(0, 0, 0);
-    --navbar-thickness: 2.4em;
-    --text-1: #ffffff;
-    --text-2: rgb(163, 204, 255);
-    --color-1: rgb(0, 110, 255);
-    --color-2: rgb(0, 82, 189);
-    --bg-1: rgb(39, 39, 39, 0);
-    box-shadow: 0px 0px 10px -3px #000000dd, 0px 0px 3px -1px black;
-    user-select: none;
-    font-weight: 400;
-    font-family: 'Inter', sans-serif;
-    font-size: 13px;
-  }
-  
-  .nav > ul {
-    list-style: none;
-    padding: 5px;
-    padding-left: 1em;
-  }
-  
-  .nav > ul > li {
-    display: inline-block;
-    height: 100%;
-  }
-  
-  .nav > ul > li > a {
-    display: inline-block;
-    color: var(--text-1);
-    height: 100%;
-    background-color: var(--bg-1);
-    border-radius: 2em;
-    text-decoration: none;
-    line-height: var(--navbar-thickness);
-    padding-left: 1em;
-    padding-right: 1em;
-    transition: .1s;
-    font-weight: 400;
-    font-family: 'Inter', sans-serif;
-    font-size: 13px;
-  }
-  
-  .nav > ul > li > a:hover {
-    background-color: var(--color-1);
-  }
-  
-  .nav > ul > li > a:active {
-    background-color: var(--color-2);
-    box-shadow: inset 0px 0px 10px -2px black, inset 0px 0px 3px 0px black;
-    transform: scale(0.98);
+  background-color: rgb(0, 0, 0);
+  --navbar-thickness: 2.4em;
+  --text-1: #ffffff;
+  --text-2: rgb(163, 204, 255);
+  --color-1: rgb(0, 110, 255);
+  --color-2: rgb(0, 82, 189);
+  --color-3: rgb(0, 50, 115);
+  --bg-1: rgb(39, 39, 39, 0);
+  box-shadow: 0px 0px 10px -3px #000000dd, 0px 0px 3px -1px black;
+  user-select: none;
+  font-weight: 400;
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+}
+
+.nav>ul {
+  list-style: none;
+  padding: 5px;
+  padding-left: 1em;
+}
+
+.nav>ul>li {
+  display: inline-block;
+  height: 100%;
+}
+
+.nav>ul>li>a {
+  display: inline-block;
+  color: var(--text-1);
+  height: 100%;
+  background-color: var(--bg-1);
+  border-radius: 2em;
+  text-decoration: none;
+  line-height: var(--navbar-thickness);
+  padding-left: 1em;
+  padding-right: 1em;
+  transition: .1s;
+  font-weight: 400;
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+}
+
+.nav>ul>li>a:hover {
+  background-color: var(--color-1);
+}
+
+.nav>ul>li>a:active {
+  background-color: var(--color-2);
+  box-shadow: inset 0px 0px 10px -2px black, inset 0px 0px 3px 0px black;
+  transform: scale(0.98);
+}
+
+div.head {
+  background: linear-gradient(90deg, rgb(0, 58, 134), rgb(52, 140, 255));
+  --text-1: #ffffff;
+  --text-2: rgb(163, 204, 255);
+  user-select: none;
+}
+
+div.head>a {
+  text-decoration: none;
+}
+
+div.logo {
+  max-width: 10em;
+  height: 3.6em;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+}
+
+div.logo> :first-child {
+  color: var(--text-1);
+  /* margin-right: .2em; */
+  font-size: 1.6em;
+  font-weight: 600;
+  font-family: 'Red Hat Display', sans-serif;
+}
+
+div.logo> :last-child {
+  color: var(--text-2);
+  font-size: 1.6em;
+  font-weight: 400;
+  font-family: 'Red Hat Display', sans-serif;
+}
+
+div.menuBox {
+  position: relative;
+  white-space: nowrap;
+}
+
+div.menuBox>span {
+  display: inline-block;
+  color: var(--text-1);
+  height: 100%;
+  background-color: var(--bg-1);
+  border-radius: 2em;
+  text-decoration: none;
+  line-height: var(--navbar-thickness);
+  padding-left: 1em;
+  padding-right: 1em;
+  transition: .1s;
+  font-weight: 400;
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+div.menuBox:hover>ul {
+  display: block;
+}
+
+div.menuBox:hover>span {
+  background-color: var(--color-1);
+}
+
+div.menuBox:active>span {
+  background-color: var(--color-2);
+  box-shadow: inset 0px 0px 10px -2px black, inset 0px 0px 3px 0px black;
+  transform: scale(0.98);
+}
+
+div.activeMenuBox>span {
+  background-color: var(--color-3); 
+  box-shadow: inset 0px 0px 10px -2px black, inset 0px 0px 3px 0px black;
+  transform: scale(0.98);
+}
+
+div.activeMenuBox:hover>span {
+  background-color: var(--color-3); 
+}
+
+ul.menuBox {
+  display: block;
+  position: absolute;
+  background-color: yellowgreen;
+  list-style: none;
+  margin: 0;
+  padding: .2em;
+  min-width: 150px;
+  left: 0px;
+  max-width: 80vw;
+  max-height: 80vh;
+  overflow-y: auto;
+  overflow-x: hidden;
+  text-overflow: ellipsis;
+  animation-name: menuAppear;
+  animation-duration: .5s;
+  animation-timing-function: cubic-bezier(0.075, 0.82, 0.165, 1);
+  border-radius: .5em;
+  top: 2.7em;
+  box-shadow: 0px 0px 10px -6px black, 0px 0px 4px -1px black;
+}
+
+@keyframes menuAppear {
+  0% {
+    opacity: 0;
   }
 
-  div.head {
-    background: linear-gradient(90deg, rgb(0, 58, 134), rgb(52, 140, 255));
-    --text-1: #ffffff;
-    --text-2: rgb(163, 204, 255);
-    user-select: none;
-  }
-
-  div.head > a {
-    text-decoration: none;
-  }
-
-  div.logo {
-    max-width: 10em;
-    height: 3.6em;
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    justify-content: center;
-  }
-
-  div.logo > :first-child {
-    color: var(--text-1);
-    /* margin-right: .2em; */
-    font-size: 1.6em;
-    font-weight: 600;
-    font-family: 'Red Hat Display', sans-serif;
-  }
-
-  div.logo > :last-child {
-    color: var(--text-2);
-    font-size: 1.6em;
-    font-weight: 400;
-    font-family: 'Red Hat Display', sans-serif;
-  }
-
-  div.menuBox {
-    position: relative;
-    white-space: nowrap;
-  }
-
-  div.menuBox > span {
-    display: inline-block;
-    color: var(--text-1);
-    height: 100%;
-    background-color: var(--bg-1);
-    border-radius: 2em;
-    text-decoration: none;
-    line-height: var(--navbar-thickness);
-    padding-left: 1em;
-    padding-right: 1em;
-    transition: .1s;
-    font-weight: 400;
-    font-family: 'Inter', sans-serif;
-    font-size: 13px;
-    cursor: default;
-  }
-
-  div.menuBox:hover > ul {
+  20% {
+    opacity: 0;
+    transform: scaleY(.8) translateY(-14%);
     display: block;
   }
 
-  div.menuBox:hover > span {
-    background-color: var(--color-1);
+  100% {
+    opacity: 1;
+    transform: scaleY(1) translateY(0%);
   }
+}
 
-  ul.menuBox {
-    display: block;
-    position: absolute;
-    background-color: yellowgreen;
-    list-style: none;
-    margin: 0;
-    padding: .2em;
-    min-width: 150px;
-    left: 0px;
-    max-width: 80vw;
-    max-height: 80vh;
-    overflow-y: auto;
-    overflow-x: hidden;
-    text-overflow: ellipsis;
-  }
+ul.menuBox>li {
+  padding: .5em;
+  background-color: antiquewhite;
+}
 
-  ul.menuBox > li {
-    padding: .5em;
-    background-color: antiquewhite;
-  }
+div.subMenu {
+  background-color: lightgoldenrodyellow;
+}
 
-  div.subMenu {
-    background-color: lightgoldenrodyellow;
-  }
+div.subMenu>span {
+  padding: .5em;
+  display: inline-block;
+  cursor: pointer;
+  background-color: lightgrey;
+}
 
-  div.subMenu > span {
-    padding: .5em;
-    display: inline-block;
-    cursor: pointer;
-    background-color: lightgrey;
-  }
+div.subMenu>ul {
+  list-style: none;
+  margin: 0;
+  padding-left: 1em;
+  background-color: lightcoral;
 
-  div.subMenu > ul {
-    list-style: none;
-    margin: 0;
-    padding-left: .5em;
-    background-color: lightcoral;
-  }
+  outline: solid 1px red;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
 
-  div.subMenu > ul > li {
-    padding: .5em;
-    background-color: lightblue;
-  }
+div.subMenu>ul>li {
+  padding: .5em;
+  background-color: lightblue;
+  text-overflow: ellipsis;
+}
