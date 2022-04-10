@@ -12,6 +12,9 @@ export default function GraphViewer(props) {
     const [samples, setSamples] = useState([]);
     const [seconds, setSeconds] = useState(0)
     const [paused, setPaused] = useState(true);
+    const [showNodes, setShowNodes] = useState(true)
+    const [fullscreen, setFullscreen] = useState(false);
+    const graphContainer = useRef();
     const loaded = useRef(false);
 
     const G = props.graph;
@@ -200,6 +203,8 @@ export default function GraphViewer(props) {
         if (graphLength !== graph.length) {
             updateSamples()
             //console.log('did change length');
+            setSeconds(0)
+            setPaused(true)
             return true
         }
         for (var i = 0; i < samplesCount; i++) {
@@ -408,15 +413,27 @@ export default function GraphViewer(props) {
         setZoom(e.target.value * 3)
     }
 
+    function toggleFullscreen() {
+        if (fullscreen) {
+            //return from fullscreen
+            document.exitFullscreen();
+        } else {
+            graphContainer.current.requestFullscreen();
+        }
+        setFullscreen(!fullscreen);
+    }
+
     function generateReactCode(points) {
         var reactCode = [];
         points.forEach((point, node, points) => {
             const pointX = -point[1] * zoom + xOffset;
             const pointY = point[0] * zoom + yOffset;
             //console.log(pointY);
-            reactCode.push(
-                <Node key={node + "n"} node={node} type={nType[node]} data={nData[node]} top={pointX} left={pointY} />
-            )
+            if (showNodes) {
+                reactCode.push(
+                    <Node key={node + "n"} node={node} type={nType[node]} data={nData[node]} top={pointX} left={pointY} />
+                )
+            }
             try {
                 if (node !== 0) {
                     const parentNode = findParentOf(node, G);
@@ -475,9 +492,24 @@ export default function GraphViewer(props) {
     const reactCode = generateReactCode(points)
     //console.log('render')
     return (
-        <div className={style.container}>
-            <input className={style.range} type="range" onChange={handleZoom} min="2" max="200" step=".1"></input>
-            <div onMouseMove={handleDrag} className={style.container2} onClick={() => { setPaused(!paused) }}>
+        <div className={style.container} ref={graphContainer}>
+            <div className={style.settings}>
+                <div>Ticks: {seconds} {paused ? ' (paused)' : ''}</div>
+                <button onClick={() => { setPaused(!paused) }}>
+                    {paused ? 'Run' : 'Pause'}
+                </button>
+                <button onClick={() => { setShowNodes(!showNodes) }}>
+                    {showNodes ? 'Hide nodes' : 'Show nodes'}
+                </button>
+                <button onClick={toggleFullscreen}>
+                    {fullscreen ? 'Exit full screen' : 'Full screen'}
+                </button>
+                <label>
+                    Zoom
+                    <input className={style.range} type="range" onChange={handleZoom} min="2" max="200" step=".1"></input>
+                </label>
+            </div>
+            <div onMouseMove={handleDrag} className={style.container2} >
                 {/* <Node node="1" type="article" data="nodeData" top="40" left="100" />
                 <Link width="200" top="20" left="50" rotate="40"></Link> */}
                 {reactCode}
