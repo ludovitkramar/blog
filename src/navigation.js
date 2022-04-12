@@ -60,13 +60,15 @@ function SubMenu(props) {
   const array = props.array.slice(1);
   const submenuName = props.array[0];
   return (
-    <div className={style.subMenu}>
-      <span onClick={() => { setOpen(!open) }}>
-        {open ? ' - ' : ' + '}
-        {submenuName}
-      </span>
-      {open ? <ul>{genListItems(array)}</ul> : null}
-    </div>
+    <li>
+      <div className={style.subMenu}>
+        <span onClick={() => { setOpen(!open) }}>
+          {open ? <i class="fa fa-caret-down"></i> : <i class="fa fa-caret-right"></i>}
+          {" "}{submenuName}
+        </span>
+        {open ? <ul>{genListItems(array)}</ul> : null}
+      </div>
+    </li>
   )
 }
 
@@ -77,8 +79,8 @@ function CategoryMenu(props) {
   return (
     <li>
       <div className={open ? style.activeMenuBox + " " + style.menuBox : style.menuBox}>
-        <span onClick={() => { setOpen(!open) }}>{categoryName}</span>
-        {open ? <ul className={style.menuBox}>{genListItems(array)}</ul> : null}
+        <span>{categoryName}</span>
+        <ul className={style.menuBox}>{genListItems(array)}</ul>
       </div>
     </li>
   )
