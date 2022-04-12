@@ -1,6 +1,6 @@
 import { Outlet, Link } from "react-router-dom";
 import style from './navigation.module.css';
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 
 function convertText(text) {
   var title = text.replaceAll('_', " ")
@@ -33,8 +33,9 @@ export default function Nav(props) {
       </Link></div>
       <nav className={style.nav}>
         <ul>
-          <CategoryMenu array={['Category', ['Category', 'item1', 'item2', ['subMenu', 'sub1', 'sub2', ['subMenu2', 'xyz', 'WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW']], 'item3'], ['Category', 'item1', 'item2', ['subMenu', 'sub1', 'sub2', ['subMenu2', 'xyz']], 'item3'], ['Category', 'item1', 'item2', ['subMenu', 'sub1', 'sub2', ['subMenu2', 'xyz']], 'item3'], ['Category', 'item1', 'item2', ['subMenu', 'sub1', 'sub2', ['subMenu2', 'xyz']], 'item3'], 'item1', 'item2', ['subMenu', 'sub1', 'sub2', ['subMenu2', 'xyz']], 'item3']}></CategoryMenu>
+          <CategoryMenu array={['Category TEST', ['Category', 'item1', 'item2', ['subMenu', 'sub1', 'sub2', ['subMenu2', 'xyz', 'WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW']], 'item3'], ['Category', 'item1', 'item2', ['subMenu', 'sub1', 'sub2', ['subMenu2', 'xyz']], 'item3'], ['Category', 'item1', 'item2', ['subMenu', 'sub1', 'sub2', ['subMenu2', 'xyz']], 'item3'], ['Category', 'item1', 'item2', ['subMenu', 'sub1', 'sub2', ['subMenu2', 'xyz']], 'item3'], 'item1', 'item2', ['subMenu', 'sub1', 'sub2', ['subMenu2', 'xyz']], 'item3']}></CategoryMenu>
           {mapArticles(props.articlesList)}
+          <CategoryMenu array={['Testing MENU']} />
         </ul>
       </nav>
       <Outlet />
@@ -63,7 +64,7 @@ function SubMenu(props) {
     <li>
       <div className={style.subMenu}>
         <span onClick={() => { setOpen(!open) }}>
-          {open ? <i class="fa fa-caret-down"></i> : <i class="fa fa-caret-right"></i>}
+          {open ? <i className="fa fa-caret-down"></i> : <i className="fa fa-caret-right"></i>}
           {" "}{submenuName}
         </span>
         {open ? <ul>{genListItems(array)}</ul> : null}
@@ -73,14 +74,33 @@ function SubMenu(props) {
 }
 
 function CategoryMenu(props) {
-  const [open, setOpen] = useState(false)
   const array = props.array.slice(1);
   const categoryName = props.array[0];
+  const menu = useRef();
+  const butt = useRef();
+  useEffect(() => {
+    //prevent menu from overflowing to the right of the viewport
+    //TODO: what if the window is resized?
+    const ele = menu.current;
+    const btt = butt.current;
+    const vw = Math.max(document.documentElement.clientWidth || 0, window.innerWidth || 0);
+    const ew = ele.offsetWidth;
+    ele.classList.toggle(style.tmpStyle) //hide after measuring width
+    const el = btt.getBoundingClientRect().left;
+    var offset = 0;
+    if (ew + el > vw - 10) offset = vw - 20 - el - ew //if it goes outside of the screen calculate the offset
+    console.log(vw, ew, el);
+    ele.style.left = `${offset}px`;
+    //console.log(ele);
+    //console.log(btt);
+  })
   return (
     <li>
-      <div className={open ? style.activeMenuBox + " " + style.menuBox : style.menuBox}>
+      <div className={style.menuBox} ref={butt}>
         <span>{categoryName}</span>
-        <ul className={style.menuBox}>{genListItems(array)}</ul>
+        <ul className={style.menuBox + " " + style.tmpStyle} ref={menu}>
+          {genListItems(array)}
+        </ul>
       </div>
     </li>
   )
