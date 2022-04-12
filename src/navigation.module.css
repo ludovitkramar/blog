@@ -89,6 +89,7 @@ div.logo> :last-child {
 div.menuBox {
   position: relative;
   white-space: nowrap;
+  z-index: 2;
 }
 
 div.menuBox>span {
@@ -106,6 +107,48 @@ div.menuBox>span {
   font-family: 'Inter', sans-serif;
   font-size: 13px;
   cursor: pointer;
+}
+
+div.menuBox:hover::before {
+  content: '';
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  background-color: var(--color-1);
+  right: -10px;
+  bottom: 0;
+  animation-name: cornerAppear;
+  animation-duration: .5s;
+  animation-timing-function: cubic-bezier(0.075, 0.82, 0.165, 1);
+}
+
+div.menuBox:hover::after {
+  content: '';
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  border-radius: 10px;
+  background-color: black;
+  clip: rect(10px, 10px, 20px, 0px);
+  right: -20px;
+  bottom: 0;
+  animation-name: cornerAppear;
+  animation-duration: .5s;
+  animation-timing-function: cubic-bezier(0.075, 0.82, 0.165, 1);
+}
+
+@keyframes cornerAppear {
+  0% {
+    opacity: 0;
+  }
+
+  50% {
+    opacity: 0;
+  }
+
+  100% {
+    opacity: 1;
+  }
 }
 
 div.menuBox:hover>ul {
