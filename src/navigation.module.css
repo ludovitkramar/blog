@@ -133,10 +133,10 @@ div.menuBox:hover>span {
 }
 
 ul.menuBox {
-  --padding: .6em;
-  --list-margin: .4em;
-  --border-radius: .8em;
-  display: block;
+  --padding: .7em;
+  --list-margin: .5em;
+  --border-radius: .3em;
+  display: none;
   position: absolute;
   background-color: rgb(36, 36, 36);
   border-top: 3px solid var(--color-1);
@@ -157,6 +157,7 @@ ul.menuBox {
   border-radius: .6em;
   border-top-left-radius: 0;
   box-shadow: 0px 3px 10px -6px black, 0px 2px 4px -1px black;
+  z-index: 200;
 }
 
 @keyframes menuAppear {
@@ -187,8 +188,7 @@ ul.menuBox>li:last-child {
 ul.menuBox>li>a {
   display: block;
   padding: var(--padding);
-  background-color: #00000000;
-  outline: 1px solid rgb(95, 95, 95);
+  background-color: #ffffff11;
   padding-left: 1.3em;
   color: white;
   border-radius: var(--border-radius);
@@ -198,7 +198,6 @@ ul.menuBox>li>a {
 
 ul.menuBox>li>a:hover {
   background-color: var(--color-1);
-  outline: 0px;
 }
 
 ul.menuBox>li>a:active {
@@ -211,6 +210,7 @@ div.subMenu {
   border-radius: var(--border-radius);
   /* background-color: rgb(50, 50, 50); */
   background-color: rgba(100, 100, 100, .2);
+  border-left: 2px solid white;
 }
 
 div.subMenu>span {
@@ -257,8 +257,7 @@ div.subMenu>ul>li>a {
   display: block;
   padding: var(--padding);
   border-radius: var(--border-radius);
-  background-color: rgb(125, 125, 125, 0);
-  outline: 1px solid rgb(95, 95, 95);
+  background-color: #ffffff11;
   color: white;
   text-decoration: none;
   transition: .04s;
@@ -266,7 +265,6 @@ div.subMenu>ul>li>a {
 
 div.subMenu>ul>li>a:hover {
   background-color: var(--color-1);
-  outline: 0px solid rgb(95, 95, 95);
 }
 
 div.subMenu>ul>li>a:active {
