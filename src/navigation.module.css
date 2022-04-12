@@ -89,7 +89,6 @@ div.logo> :last-child {
 div.menuBox {
   position: relative;
   white-space: nowrap;
-  z-index: 2;
 }
 
 div.menuBox>span {
