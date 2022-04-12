@@ -525,7 +525,7 @@ export default function GraphViewer(props) {
             <div className={style.settings}>
                 {settingsSh(showSettings)}
                 <div className={style.sh} onClick={() => { setShowSettings(!showSettings) }}>
-                    {showSettings ? <span><i class="fa fa-chevron-up"></i> Hide settings</span> : <span><i class="fa fa-chevron-down"></i> Show settings</span>}
+                    {showSettings ? <span><i className="fa fa-chevron-up"></i> Hide settings</span> : <span><i className="fa fa-chevron-down"></i> Show settings</span>}
                 </div>
             </div>
 
