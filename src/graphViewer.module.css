@@ -27,16 +27,17 @@ div.settings {
   font-size: 13px;
   padding: .4em;
   position: absolute;
-  width: 300px;
+  width: 200px;
   max-width: 60%;
   margin: 3px;
   right: 6px;
   top: 6px;
   border-radius: 6px;
   z-index: 106;
-  background-color: rgb(226, 226, 226);
+  background-color: rgb(36, 36, 36);
   border: 1px solid black;
-  color: black;
+  box-shadow: 0px 0px 2px 0px black;
+  color: white;
 }
 
 div.settings > button {
@@ -44,44 +45,79 @@ div.settings > button {
   font-family: 'Inter', sans-serif;
   font-size: 13px;
   color: white;
-  display: inline-block;
+  display: block;
+  width: 100%;
   margin-right: .4em;
   margin-bottom: .4em;
-  padding: .5em;
+  padding: .7em;
   padding-left: .7em;
   padding-right: .7em;
   border-radius: .5em;
   border: 0px solid rgb(0, 42, 84);
   box-shadow: 0px 0px 3px -1px rgb(0, 42, 84);
   cursor: pointer;
-  transition: .1s;
+  transition: .04s;
   background-color: rgb(0, 93, 186);
   white-space: nowrap;
 }
 
 div.settings > button:hover {
-  background-color: rgb(21, 127, 233);
+  background-color: rgb(50, 149, 248);
 }
 
 div.settings > button:active {
-  background-color: rgb(4, 88, 171);
+  background-color: rgb(3, 70, 137);
   box-shadow: inset 0px 0px 6px -2px rgb(28, 28, 28);
 }
 
 div.settings > div {
-  background-color: rgb(249, 249, 249);
-  border: 1px solid grey;
+  background-color: rgb(50, 50, 50);
   padding: .4em;
   margin-bottom: .4em;
   border-radius: .4em;
+  color: white;
 }
 
 div.settings > label {
   display: block;
-  background-color: rgb(250, 250, 250);
-  border: 1px solid grey;
+  background-color: rgb(50, 50, 50);
+  color: white;
   padding: .4em;
   border-radius: .4em;
+  margin-bottom: .4em;
+}
+
+div.settings > :last-child {
+  margin-bottom: 0;
+}
+
+div.settings > div > a {
+  color: rgb(211, 233, 255);
+}
+
+div.settings > div > a:hover {
+  color: rgb(255, 255, 255);
+}
+
+div.settings > div > a:active {
+  color: rgb(255, 255, 255);
+  background-color: #2B61CC;
+}
+
+div.sh {
+  cursor: pointer;
+  background-color: rgb(80, 80, 80) !important;
+  border-width: 0px !important;
+  padding: 10px !important;
+  transition: .1s;
+}
+
+div.sh:hover {
+  background-color: rgb(102, 102, 102) !important;
+}
+
+div.sh:active {
+  background-color: black !important;
 }
 
 .node {

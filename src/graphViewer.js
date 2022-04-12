@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { Link } from "react-router-dom";
 import style from './graphViewer.module.css'
 
 export default function GraphViewer(props) {
@@ -14,6 +15,7 @@ export default function GraphViewer(props) {
     const [paused, setPaused] = useState(true);
     const [showNodes, setShowNodes] = useState(true)
     const [fullscreen, setFullscreen] = useState(false);
+    const [showSettings, setShowSettings] = useState(true);
     const graphContainer = useRef();
     const loaded = useRef(false);
 
@@ -75,9 +77,9 @@ export default function GraphViewer(props) {
     //console.log(calcularEcuacionDeDosIncognitas([-3, 1, 2, -7, 1, -5])); //para calcular interseccion entre y = 3x + 2 y y = 7x -5
 
     function findParentOf(node, graph) {
-        const LinksArray = graph.slice(2);
-        for (var index = 1; index < LinksArray.length; index += 2) {
-            if (LinksArray[index] === node) return LinksArray[index - 1];
+        const LinessArray = graph.slice(2);
+        for (var index = 1; index < LinessArray.length; index += 2) {
+            if (LinessArray[index] === node) return LinessArray[index - 1];
         }
         return -1
     }
@@ -423,6 +425,32 @@ export default function GraphViewer(props) {
         setFullscreen(!fullscreen);
     }
 
+    function settingsSh(show) {
+        if (show) {
+            return (
+                <><div>Ticks: {seconds} {paused ? ' (paused)' : ''}</div>
+                    <button onClick={() => { setPaused(!paused) }}>
+                        {paused ? 'Run' : 'Pause'}
+                    </button>
+                    <button onClick={() => { setShowNodes(!showNodes) }}>
+                        {showNodes ? 'Hide nodes' : 'Show nodes'}
+                    </button>
+                    <button onClick={toggleFullscreen}>
+                        {fullscreen ? 'Exit full screen' : 'Full screen'}
+                    </button>
+                    <label>
+                        Zoom:
+                        <input className={style.range} type="range" onChange={handleZoom} min="2" max="200" step=".1"></input>
+                    </label>
+                    <div>
+                        <Link to='/article/graph_viewer'>About GraphViewer</Link>
+                    </div></>
+            )
+        } else {
+            return
+        }
+    }
+
     function generateReactCode(points) {
         var reactCode = [];
         points.forEach((point, node, points) => {
@@ -447,7 +475,7 @@ export default function GraphViewer(props) {
                     if (linkX2 - linkX1 < 0) angleInDeg = -(angle / Math.PI * 180)
                     // console.log(`[${parentNode},${node}] Angle in rad: ${angle}; angle in deg: ${angleInDeg}`)
                     reactCode.push(
-                        <Link key={node + "l"} width={length} top={linkX1} left={linkY1} rotate={angleInDeg}></Link>
+                        <Lines key={node + "l"} width={length} top={linkX1} left={linkY1} rotate={angleInDeg}></Lines>
                     )
                 }
             } catch (error) {
@@ -493,25 +521,17 @@ export default function GraphViewer(props) {
     //console.log('render')
     return (
         <div className={style.container} ref={graphContainer}>
+
             <div className={style.settings}>
-                <div>Ticks: {seconds} {paused ? ' (paused)' : ''}</div>
-                <button onClick={() => { setPaused(!paused) }}>
-                    {paused ? 'Run' : 'Pause'}
-                </button>
-                <button onClick={() => { setShowNodes(!showNodes) }}>
-                    {showNodes ? 'Hide nodes' : 'Show nodes'}
-                </button>
-                <button onClick={toggleFullscreen}>
-                    {fullscreen ? 'Exit full screen' : 'Full screen'}
-                </button>
-                <label>
-                    Zoom
-                    <input className={style.range} type="range" onChange={handleZoom} min="2" max="200" step=".1"></input>
-                </label>
+                {settingsSh(showSettings)}
+                <div className={style.sh} onClick={() => { setShowSettings(!showSettings) }}>
+                    {showSettings ? <span><i class="fa fa-chevron-up"></i> Hide settings</span> : <span><i class="fa fa-chevron-down"></i> Show settings</span>}
+                </div>
             </div>
+
             <div onMouseMove={handleDrag} className={style.container2} >
                 {/* <Node node="1" type="article" data="nodeData" top="40" left="100" />
-                <Link width="200" top="20" left="50" rotate="40"></Link> */}
+                <Lines width="200" top="20" left="50" rotate="40"></Lines> */}
                 {reactCode}
             </div>
         </div>
@@ -542,7 +562,7 @@ function Node(props) {
     )
 }
 
-function Link(props) {
+function Lines(props) {
     const linkStyle = {
         width: props.width + 'px',
         top: props.top + 'px',
