@@ -18,6 +18,7 @@ export default function Article(props) {
             })
             .then(data => {
                 setData(data);
+                setError(null);
             })
             .catch(error => {
                 console.error('Error fetching article:' + error);
