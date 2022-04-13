@@ -1,6 +1,6 @@
 import { Outlet, Link } from "react-router-dom";
 import style from './navigation.module.css';
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef } from "react";
 
 function convertText(text) {
   var title = text.replaceAll('_', " ")
@@ -10,19 +10,6 @@ function convertText(text) {
 }
 
 export default function Nav(props) {
-  function mapArticles(array) {
-    const links = array.map((e, i) => {
-      var title = e.replaceAll('_', " ")
-      var firstCharCapitalized = title[0].toUpperCase();
-      title = firstCharCapitalized + title.slice(1)
-      return (
-        <li key={i}><Link to={'/article/' + e}>{title}</Link></li>
-      );
-    });
-
-    return links
-  };
-
   return (
     <>
       <div className={style.head}><Link to="/">
@@ -33,9 +20,7 @@ export default function Nav(props) {
       </Link></div>
       <nav className={style.nav}>
         <ul>
-          <CategoryMenu array={['Category TEST', ['Category', 'item1', 'item2', ['subMenu', 'sub1', 'sub2', ['subMenu2', 'xyz', 'WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW']], 'item3'], ['Category', 'item1', 'item2', ['subMenu', 'sub1', 'sub2', ['subMenu2', 'xyz']], 'item3'], ['Category', 'item1', 'item2', ['subMenu', 'sub1', 'sub2', ['subMenu2', 'xyz']], 'item3'], ['Category', 'item1', 'item2', ['subMenu', 'sub1', 'sub2', ['subMenu2', 'xyz']], 'item3'], 'item1', 'item2', ['subMenu', 'sub1', 'sub2', ['subMenu2', 'xyz']], 'item3']}></CategoryMenu>
-          {mapArticles(props.articlesList)}
-          <CategoryMenu array={['Testing MENU']} />
+          {genListItems(props.articlesList, [], true)}
         </ul>
       </nav>
       <Outlet />
@@ -44,13 +29,21 @@ export default function Nav(props) {
 }
 
 
-function genListItems(items) { //tiems is an array
+function genListItems(items, path, main) { //tiems is an array, path is yet another array, //main is bool
   var output = []
   items.forEach((element, index) => {
     if (typeof (element) === 'string') { //is string
-      output.push(<li key={index}><Link to={'/article/' + element}>{convertText(element)}</Link></li>)
+      if (path.length > 0) {
+        output.push(<li key={index}><Link to={`/article/${path.join('/')}/${element}`}>{convertText(element)}</Link></li>)
+      } else {
+        output.push(<li key={index}><Link to={`/article/${element}`}>{convertText(element)}</Link></li>)
+      }
     } else {
-      output.push(<SubMenu key={index} array={element}></SubMenu>) //assume the current element is an array and create submenu
+      if (!main) { //main means main menu bar
+        output.push(<SubMenu key={index} array={element} path={path}></SubMenu>) //assume the current element is an array and create submenu
+      } else {
+        output.push(<CategoryMenu key={index} array={element}></CategoryMenu>)
+      }
     }
   });
   return output
@@ -60,6 +53,7 @@ function SubMenu(props) {
   const [open, setOpen] = useState(false)
   const array = props.array.slice(1);
   const submenuName = props.array[0];
+  const path = props.path.concat([submenuName]);
   return (
     <li>
       <div className={style.subMenu}>
@@ -67,7 +61,7 @@ function SubMenu(props) {
           {open ? <i className="fa fa-caret-down"></i> : <i className="fa fa-caret-right"></i>}
           {" "}{submenuName}
         </span>
-        {open ? <ul>{genListItems(array)}</ul> : null}
+        {open ? <ul>{genListItems(array, path, false)}</ul> : null}
       </div>
     </li>
   )
@@ -94,7 +88,7 @@ function CategoryMenu(props) {
       <div className={style.menuBox} ref={butt} onMouseEnter={correctOffset}>
         <span>{categoryName}</span>
         <ul className={style.menuBox} ref={menu}>
-          {genListItems(array)}
+          {genListItems(array, [categoryName], false)}
         </ul>
       </div>
     </li>
