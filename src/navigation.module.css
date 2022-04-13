@@ -101,7 +101,7 @@ div.menuBox>span {
   line-height: var(--navbar-thickness);
   padding-left: 1em;
   padding-right: 1em;
-  transition: .1s;
+  /* transition: .1s; */
   font-weight: 400;
   font-family: 'Inter', sans-serif;
   font-size: 13px;
@@ -116,9 +116,9 @@ div.menuBox:hover::before {
   background-color: var(--color-1);
   right: -10px;
   bottom: 0;
-  animation-name: cornerAppear;
+  /* animation-name: cornerAppear;
   animation-duration: .5s;
-  animation-timing-function: cubic-bezier(0.075, 0.82, 0.165, 1);
+  animation-timing-function: cubic-bezier(0.075, 0.82, 0.165, 1); */
 }
 
 div.menuBox:hover::after {
@@ -131,9 +131,9 @@ div.menuBox:hover::after {
   clip: rect(10px, 10px, 20px, 0px);
   right: -20px;
   bottom: 0;
-  animation-name: cornerAppear;
+  /* animation-name: cornerAppear;
   animation-duration: .5s;
-  animation-timing-function: cubic-bezier(0.075, 0.82, 0.165, 1);
+  animation-timing-function: cubic-bezier(0.075, 0.82, 0.165, 1); */
 }
 
 @keyframes cornerAppear {
@@ -141,7 +141,7 @@ div.menuBox:hover::after {
     opacity: 0;
   }
 
-  50% {
+  20% {
     opacity: 0;
   }
 
@@ -157,15 +157,13 @@ div.menuBox:hover>ul {
 div.menuBox:hover>span {
   background-color: var(--color-1);
   animation-name: menuAppearCorner;
-  animation-duration: .8s;
+  animation-duration: 0s;
   animation-timing-function: cubic-bezier(0.075, 0.82, 0.165, 1);
   animation-fill-mode: forwards;
 }
 
 @keyframes menuAppearCorner {
-  0% {}
-
-  20% {
+  0% {
     border-radius: 1.4em;
   }
 
@@ -211,10 +209,6 @@ ul.menuBox {
 
 @keyframes menuAppear {
   0% {
-    opacity: 0;
-  }
-
-  50% {
     opacity: 0;
     transform: scaleY(.8) translateY(-14%);
     display: block;

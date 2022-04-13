@@ -59,7 +59,7 @@ function SubMenu(props) {
       <div className={style.subMenu}>
         <span onClick={() => { setOpen(!open) }}>
           {open ? <i className="fa fa-caret-down"></i> : <i className="fa fa-caret-right"></i>}
-          {" "}{submenuName}
+          {" "}{convertText(submenuName)}
         </span>
         {open ? <ul>{genListItems(array, path, false)}</ul> : null}
       </div>
@@ -86,7 +86,7 @@ function CategoryMenu(props) {
   return (
     <li>
       <div className={style.menuBox} ref={butt} onMouseEnter={correctOffset}>
-        <span>{categoryName}</span>
+        <span>{convertText(categoryName)}</span>
         <ul className={style.menuBox} ref={menu}>
           {genListItems(array, [categoryName], false)}
         </ul>
