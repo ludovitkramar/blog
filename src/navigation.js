@@ -78,27 +78,22 @@ function CategoryMenu(props) {
   const categoryName = props.array[0];
   const menu = useRef();
   const butt = useRef();
-  useEffect(() => {
-    //prevent menu from overflowing to the right of the viewport
-    //TODO: what if the window is resized?
+  function correctOffset() {
     const ele = menu.current;
     const btt = butt.current;
     const vw = Math.max(document.documentElement.clientWidth || 0, window.innerWidth || 0);
     const ew = ele.offsetWidth;
-    ele.classList.toggle(style.tmpStyle) //hide after measuring width
     const el = btt.getBoundingClientRect().left;
     var offset = 0;
     if (ew + el > vw - 10) offset = vw - 20 - el - ew //if it goes outside of the screen calculate the offset
-    console.log(vw, ew, el);
+    console.log(vw, ew, el, offset);
     ele.style.left = `${offset}px`;
-    //console.log(ele);
-    //console.log(btt);
-  })
+  }
   return (
     <li>
-      <div className={style.menuBox} ref={butt}>
+      <div className={style.menuBox} ref={butt} onMouseEnter={correctOffset}>
         <span>{categoryName}</span>
-        <ul className={style.menuBox + " " + style.tmpStyle} ref={menu}>
+        <ul className={style.menuBox} ref={menu}>
           {genListItems(array)}
         </ul>
       </div>
