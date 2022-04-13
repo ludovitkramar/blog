@@ -22,6 +22,7 @@ function Page() {
       })
       .then(articlesList => {
         setArticlesList(articlesList)
+        setError(null);
       })
       .catch(error => {
         console.error("Error fetching articles list: " + error);
@@ -35,17 +36,35 @@ function Page() {
   if (loading) return <span>Loading...</span>
   if (error) return <span>Error</span>
 
+  function createRouteRecursionFestival(list, path) {
+    var routeArray = [];
+    list.forEach((e, i) => {
+      if (typeof (e) === 'string') {
+        if (path.length > 0) {
+          routeArray.push(<Route key={i}
+            path={`/article/${path.join('/')}/${e}`}
+            element={<Article article={`${path.join('/')}/${e}`} />} />
+          )
+        } else {
+          routeArray.push(<Route key={i} path={"/article/" + e} element={<Article article={e} />} />)
+        }
+      } else {
+        const pathName = e[0] //the first element contains the name
+        const newPath = path.concat([pathName]);
+        const newList = e.slice(1); //remove name from thing
+        routeArray.push(createRouteRecursionFestival(newList, newPath))
+      }
+    });
+    return routeArray
+  }
+
   return (
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<Nav articlesList={articlesList} />}>
           <Route index element={<span>index</span>} />
           <Route path="*" element={<span>404 error</span>} />
-          {articlesList.map((e, i) => {
-            return (
-              <Route key={i} path={"/article/" + e} element={<Article article={e} />} />
-            )
-          })}
+          {createRouteRecursionFestival(articlesList, [])}
         </Route>
       </Routes>
     </BrowserRouter>
