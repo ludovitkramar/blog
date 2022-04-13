@@ -86,7 +86,7 @@ function CategoryMenu(props) {
     const el = btt.getBoundingClientRect().left;
     var offset = 0;
     if (ew + el > vw - 10) offset = vw - 20 - el - ew //if it goes outside of the screen calculate the offset
-    console.log(vw, ew, el, offset);
+    //console.log(vw, ew, el, offset);
     ele.style.left = `${offset}px`;
   }
   return (
