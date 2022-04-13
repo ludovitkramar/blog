@@ -443,7 +443,7 @@ export default function GraphViewer(props) {
                         <input className={style.range} type="range" onChange={handleZoom} min="2" max="200" step=".1"></input>
                     </label>
                     <div>
-                        <Link to='/article/graph_viewer'>About GraphViewer</Link>
+                        <Link to='/article/about/graph_viewer'>About GraphViewer</Link>
                     </div></>
             )
         } else {
