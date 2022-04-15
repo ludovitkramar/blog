@@ -454,6 +454,8 @@ export default function GraphViewer(props) {
     }
 
     function handleTouchMove(e) {
+        e.preventDefault()
+        e.stopImmediatePropagation();
         if (isMouseDown) {
             if (e.changedTouches.length === 1) {
                 setxOffset(xOffset + e.changedTouches[0].clientY - startY)
