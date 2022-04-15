@@ -1,6 +1,7 @@
 .nav {
   background-color: rgb(0, 0, 0);
-  --navbar-thickness: 2.4em;
+  --navbar-thickness: 2.8em;
+  --menubar-padding: 1.2em;
   --text-1: #ffffff;
   --text-2: rgb(163, 204, 255);
   --color-1: rgb(0, 110, 255);
@@ -33,8 +34,8 @@
   border-radius: 2em;
   text-decoration: none;
   line-height: var(--navbar-thickness);
-  padding-left: 1em;
-  padding-right: 1em;
+  padding-left: var(--menubar-padding);
+  padding-right: var(--menubar-padding);
   transition: .1s;
   font-weight: 400;
   font-family: 'Inter', sans-serif;
@@ -99,55 +100,13 @@ div.menuBox>span {
   border-radius: 2em;
   text-decoration: none;
   line-height: var(--navbar-thickness);
-  padding-left: 1em;
-  padding-right: 1em;
+  padding-left: var(--menubar-padding);
+  padding-right: var(--menubar-padding);
   /* transition: .1s; */
   font-weight: 400;
   font-family: 'Inter', sans-serif;
   font-size: 13px;
-  cursor: pointer;
-}
-
-div.menuBox:hover::before {
-  content: '';
-  position: absolute;
-  width: 10px;
-  height: 10px;
-  background-color: var(--color-1);
-  right: -10px;
-  bottom: 0;
-  /* animation-name: cornerAppear;
-  animation-duration: .5s;
-  animation-timing-function: cubic-bezier(0.075, 0.82, 0.165, 1); */
-}
-
-div.menuBox:hover::after {
-  content: '';
-  position: absolute;
-  width: 20px;
-  height: 20px;
-  border-radius: 10px;
-  background-color: black;
-  clip: rect(10px, 10px, 20px, 0px);
-  right: -20px;
-  bottom: 0;
-  /* animation-name: cornerAppear;
-  animation-duration: .5s;
-  animation-timing-function: cubic-bezier(0.075, 0.82, 0.165, 1); */
-}
-
-@keyframes cornerAppear {
-  0% {
-    opacity: 0;
-  }
-
-  20% {
-    opacity: 0;
-  }
-
-  100% {
-    opacity: 1;
-  }
+  cursor: default;
 }
 
 div.menuBox:hover>ul {
@@ -156,36 +115,22 @@ div.menuBox:hover>ul {
 
 div.menuBox:hover>span {
   background-color: var(--color-1);
-  animation-name: menuAppearCorner;
-  animation-duration: 0s;
-  animation-timing-function: cubic-bezier(0.075, 0.82, 0.165, 1);
-  animation-fill-mode: forwards;
-}
-
-@keyframes menuAppearCorner {
-  0% {
-    border-radius: 1.4em;
-  }
-
-  100% {
-    border-radius: .5em;
-    border-bottom-left-radius: 0;
-    border-bottom-right-radius: 0;
-  }
+  border-radius: 0;
+  border-top-left-radius: .5em;
+  border-top-right-radius: .5em;
 }
 
 ul.menuBox {
-  --padding: .7em;
-  --list-margin: .5em;
+  --padding: .8em;
+  --list-margin: .6em;
   --border-radius: .3em;
   display: none;
   position: absolute;
   background-color: rgb(36, 36, 36);
   border-top: 3px solid var(--color-1);
-  border-left: 3px solid var(--color-1);
   list-style: none;
   margin: 0;
-  padding: .3em;
+  padding: .5em;
   min-width: 150px;
   left: 0px;
   max-width: 80vw;
@@ -194,10 +139,11 @@ ul.menuBox {
   overflow-y: auto;
   overflow-x: hidden;
   animation-name: menuAppear;
-  animation-duration: .5s;
+  animation-duration: .2s;
   animation-timing-function: cubic-bezier(0.075, 0.82, 0.165, 1);
   border-radius: .6em;
   border-top-left-radius: 0;
+  border-top-right-radius: 0;
   box-shadow: 0px 3px 10px -6px black, 0px 2px 4px -1px black;
   z-index: 200;
 }
@@ -245,7 +191,7 @@ ul.menuBox>li>a:hover {
 
 ul.menuBox>li>a:active {
   background-color: var(--color-2);
-  box-shadow: inset 0px 0px 10px -2px black, inset 0px 0px 3px 0px black;
+  /* box-shadow: inset 0px 0px 10px -2px black, inset 0px 0px 3px 0px black; */
   transform: scale(0.98);
 }
 
@@ -274,7 +220,7 @@ div.subMenu>span:hover {
 
 div.subMenu>span:active {
   background-color: rgb(0, 0, 0);
-  box-shadow: inset 0px 0px 10px -2px black, inset 0px 0px 3px 0px black;
+  /* box-shadow: inset 0px 0px 10px -2px black, inset 0px 0px 3px 0px black; */
   transform: translateY(1px);
 }
 
@@ -312,6 +258,6 @@ div.subMenu>ul>li>a:hover {
 
 div.subMenu>ul>li>a:active {
   background-color: var(--color-2);
-  box-shadow: inset 0px 0px 10px -2px black, inset 0px 0px 3px 0px black;
+  /* box-shadow: inset 0px 0px 10px -2px black, inset 0px 0px 3px 0px black; */
   transform: scale(0.98);
 }
