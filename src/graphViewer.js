@@ -17,6 +17,7 @@ export default function GraphViewer(props) {
     const [fullscreen, setFullscreen] = useState(false);
     const [showSettings, setShowSettings] = useState(true);
     const graphContainer = useRef();
+    const graphContainer2 = useRef();
     const loaded = useRef(false);
 
     const G = props.graph;
@@ -397,16 +398,63 @@ export default function GraphViewer(props) {
         }
     }
 
-    function handleScroll(event) {
-        console.log(event.deltaY)
-        setZoom(zoom - event.deltaY * 0.5)
-    }
-
     function handleDrag(e) {
         // console.log(e);
         if (e.buttons > 0) {
             setxOffset(xOffset + e.movementY)
             setyOffset(yOffset + e.movementX)
+        }
+    }
+
+    var startX = 0;
+    var startY = 0
+    var isMouseDown = false;
+
+    function handleMouseDown(e) {
+        startX = e.clientX;
+        startY = e.clientY;
+        isMouseDown = true;
+        const ele = graphContainer2.current
+        ele.addEventListener('mouseup', handleMouseUp, false);
+        ele.addEventListener('mousemove', handleMouseMove, false);
+    }
+
+    function handleMouseUp() {
+        isMouseDown = false;
+        const ele = graphContainer2.current
+        ele.removeEventListener('mouseup', handleMouseUp, false);
+        ele.removeEventListener('mousemove', handleMouseMove, false);
+    }
+
+    function handleMouseMove(e) {
+        if (isMouseDown) {
+            setxOffset(xOffset + e.clientY - startY)
+            setyOffset(yOffset + e.clientX - startX)
+        }
+    }
+
+    function handleTouchStart(e) {
+        startX = e.changedTouches[0].clientX;
+        startY = e.changedTouches[0].clientY;
+        isMouseDown = true;
+        const ele = graphContainer2.current
+        ele.addEventListener('touchend', handleTouchEnd, false);
+        ele.addEventListener('touchmove', handleTouchMove, false);
+        ele.addEventListener('touchcancel', handleTouchEnd, false);
+    }
+
+    function handleTouchEnd() {
+        isMouseDown = false;
+        const ele = graphContainer2.current
+        ele.removeEventListener('touchend', handleTouchEnd, false);
+        ele.removeEventListener('touchmove', handleTouchMove, false);
+        ele.removeEventListener('touchcancel', handleTouchEnd, false);
+    }
+
+    function handleTouchMove(e) {
+        if (isMouseDown) {
+            setxOffset(xOffset + e.changedTouches[0].clientY - startY)
+            setyOffset(yOffset + e.changedTouches[0].clientX - startX)
         }
     }
 
@@ -418,9 +466,18 @@ export default function GraphViewer(props) {
     function toggleFullscreen() {
         if (fullscreen) {
             //return from fullscreen
-            document.exitFullscreen();
+            if (document.exitFullscreen) {
+                document.exitFullscreen()
+            } else if (document.webkitExitFullscreen) { /* Safari */
+                document.webkitExitFullscreen();
+            }
         } else {
-            graphContainer.current.requestFullscreen();
+            const elem = graphContainer.current;
+            if (elem.requestFullscreen) {
+                elem.requestFullscreen();
+            } else if (elem.webkitRequestFullscreen) { /* Safari */
+                elem.webkitRequestFullscreen();
+            }
         }
         setFullscreen(!fullscreen);
     }
@@ -508,7 +565,7 @@ export default function GraphViewer(props) {
 
         if (!paused) {
             const timer = setInterval(() => {
-                console.log(`Tick: ${seconds}`)
+                //console.log(`Tick: ${seconds}`)
                 runPhysics()
                 setSeconds(seconds + 1)
             }, 16);
@@ -521,17 +578,13 @@ export default function GraphViewer(props) {
     //console.log('render')
     return (
         <div className={style.container} ref={graphContainer}>
-
             <div className={style.settings}>
                 {settingsSh(showSettings)}
                 <div className={style.sh} onClick={() => { setShowSettings(!showSettings) }}>
                     {showSettings ? <span><i className="fa fa-chevron-up"></i> Hide settings</span> : <span><i className="fa fa-chevron-down"></i> Show settings</span>}
                 </div>
             </div>
-
-            <div onMouseMove={handleDrag} className={style.container2} >
-                {/* <Node node="1" type="article" data="nodeData" top="40" left="100" />
-                <Lines width="200" top="20" left="50" rotate="40"></Lines> */}
+            <div onMouseDown={handleMouseDown} onTouchStart={handleTouchStart} className={style.container2} ref={graphContainer2}>
                 {reactCode}
             </div>
         </div>
