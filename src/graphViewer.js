@@ -86,44 +86,55 @@ export default function GraphViewer(props) {
         return -1
     }
 
-    function checkIntersectionBetweenPoints(m1, n1, lines, exclusions, p1, p2, points, graph) {
+    function checkIntersectionBetweenPoints(m1, n1, lines, ex, p1, p2, points, graph, currentLine, colCache) {
         //exclusion is an array of numbers, if the index of an element of the array lines is in exclusions, that line shall be ignored
         var collides = false;
         var intrX = null;
         var intrY = null;
         var intersections = [];
-        var lineCrossed = null;
         var linesCrossed = [];
-        var done = false;
-        var x = null;
-        var y = null;
+        var exclusions = ex;
+        var collisionCache = colCache;
         //console.log('🎵');
         //console.log(exclusions)
         lines.forEach((value, index) => { //index is the node to which the line is directed
-            if (!exclusions.includes(index) && !done) { //if not excluded and not done
-                const m2 = value[0];
-                const n2 = value[1];
-                // y = mx + n es el formato de la línea, pero para resolver la ecuación han que convertirlo en: -mx + y = n
-                [intrX, intrY] = calcularEcuacionDeDosIncognitas([-m1, 1, n1, -m2, 1, n2])
-                //console.log(`Line y = ${m1}x + ${n1} collides at ${intrX},${intrY} with line ${index}`)
-                if (!isNaN(intrX)) {
-                    const p3 = points[findParentOf(index, graph)];
-                    const p4 = points[index];
-                    //console.log(index, p3, p4);
-                    if (isPointBetweenTwoPoints([intrX, intrY], p1, p2, m1, n1)) {
-                        if (isPointBetweenTwoPoints([intrX, intrY], p3, p4, m2, n2)) { //there's no evidence that this works properly, p3 p4 may not be the points that we want
-                            x = intrX
-                            y = intrY
-                            collides = true;
-                            lineCrossed = index;
-                            intersections.push([x, y]);
-                            linesCrossed.push(lineCrossed);
+            if (!exclusions.includes(index)) { //if not excluded
+                if (typeof collisionCache[currentLine] !== 'undefined' && typeof collisionCache[currentLine][index] !== 'undefined') { //if there's cache
+                    //if (typeof collisionCache[currentLine][index] !== 'undefined') { //if there really is cache
+                    if (!collisionCache[currentLine][index]) { //if no collision
+                        //do nothing
+                    } else { //return point
+                        collides = true;
+                        intersections.push(collisionCache[currentLine][index]); //point of intersection
+                        linesCrossed.push(index); //id of line that was intersected
+                    }
+                    //}
+                } else { //no cache
+                    if (typeof collisionCache[index] === 'undefined') collisionCache[index] = [] //create array for the line if it isn't there
+                    const m2 = value[0];
+                    const n2 = value[1];
+                    // y = mx + n es el formato de la línea, pero para resolver la ecuación hay que convertirlo en: -mx + y = n
+                    [intrX, intrY] = calcularEcuacionDeDosIncognitas([-m1, 1, n1, -m2, 1, n2])
+                    //console.log(`Line y = ${m1}x + ${n1} collides at ${intrX},${intrY} with line ${index}`)
+                    if (!isNaN(intrX)) {
+                        const p3 = points[findParentOf(index, graph)];
+                        const p4 = points[index];
+                        //console.log(index, p3, p4);
+                        if (isPointBetweenTwoPoints([intrX, intrY], p1, p2, m1, n1)) {
+                            if (isPointBetweenTwoPoints([intrX, intrY], p3, p4, m2, n2)) { //there's no evidence that this works properly, p3 p4 may not be the points that we want
+                                collides = true;
+                                intersections.push([intrX, intrY]); //point of intersection
+                                linesCrossed.push(index); //id of line that was intersected
+                                collisionCache[index][currentLine] = [intrX, intrY] //save point to cache
+                            }
                         }
                     }
+                    if (typeof collisionCache[index][currentLine] === 'undefined') collisionCache[index][currentLine] = false; //if nothing is in the cache, save null indicating no collision
                 }
             }
         });
-        return [collides, intersections, linesCrossed]
+        //console.log(collisionCache);
+        return [collides, intersections, linesCrossed, collisionCache]
     }
 
     function isPointBetweenTwoPoints(itr, p1, p2, m, n) {
@@ -271,6 +282,7 @@ export default function GraphViewer(props) {
             }
         }
 
+        var colCache = [];
         //for each line (all points except 0)
         lines.forEach((value, currentPoint) => {
             const parentPoint = findParentOf(currentPoint, graph)
@@ -280,8 +292,8 @@ export default function GraphViewer(props) {
             const allChilds = getChildsOf(graph, currentPoint);
             const childsOfParent = getChildsOf(graph, parentPoint);
             const exclusions = [currentPoint, parentPoint].concat(allChilds).concat(childsOfParent)
-            const [collides, intersections, linesCrossed] = checkIntersectionBetweenPoints(m, n, lines, exclusions, p1, p2, points, graph)
-
+            const [collides, intersections, linesCrossed, collisionCache] = checkIntersectionBetweenPoints(m, n, lines, exclusions, p1, p2, points, graph, currentPoint, colCache)
+            colCache = collisionCache;
             // console.log(`[${currentPoint}] Collides: ${collides}`)
             // console.log(intersections);
             // console.log(linesCrossed)
