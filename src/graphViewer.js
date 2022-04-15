@@ -483,6 +483,7 @@ export default function GraphViewer(props) {
     }
 
     function toggleFullscreen() {
+        const elem = graphContainer.current;
         if (fullscreen) {
             //return from fullscreen
             if (document.exitFullscreen) {
@@ -490,15 +491,39 @@ export default function GraphViewer(props) {
             } else if (document.webkitExitFullscreen) { /* Safari */
                 document.webkitExitFullscreen();
             }
+            setFullscreen(false);
+            elem.removeEventListener('fullscreenchange', handleFullscreenChagne, false)
         } else {
-            const elem = graphContainer.current;
             if (elem.requestFullscreen) {
                 elem.requestFullscreen();
             } else if (elem.webkitRequestFullscreen) { /* Safari */
                 elem.webkitRequestFullscreen();
             }
+            setFullscreen(true);
+            elem.addEventListener('fullscreenchange', handleFullscreenChagne, false)
         }
-        setFullscreen(!fullscreen);
+    }
+
+    function handleFullscreenChagne(e) {
+        const elem = graphContainer.current;
+        console.log('fullscreenchange');
+        console.log(document.fullscreenElement);
+        if (document.fullscreenElement) { //if is fullscreen
+            setFullscreen(true);
+        } else {
+            setFullscreen(false);
+            elem.removeEventListener('fullscreenchange', handleFullscreenChagne, false)
+        }
+    }
+
+    function handleKeydown(e) {
+        switch (e.key) {
+            case 'f':
+                toggleFullscreen()
+                break;
+            default:
+                break;
+        }
     }
 
     function settingsSh(show) {
@@ -602,7 +627,7 @@ export default function GraphViewer(props) {
     const reactCode = generateReactCode(points)
     //console.log('render')
     return (
-        <div className={style.container} ref={graphContainer}>
+        <div className={style.container} ref={graphContainer} onKeyDown={handleKeydown} tabIndex={0}>
             <div className={style.settings}>
                 {settingsSh(showSettings)}
                 <div className={style.sh} onClick={() => { setShowSettings(!showSettings) }}>
