@@ -225,15 +225,15 @@ p.nData {
 }
 
 .root {
-  --type-color: black;
+  --type-color: rgb(145, 24, 24);
 }
 
 .Title {
-  --type-color: skyblue;
+  --type-color: rgb(0, 60, 255);
 }
 
 .Paragraph {
-  --type-color: blue;
+  --type-color: rgb(255, 0, 195);
 }
 
 .UnorderedList {
@@ -241,15 +241,15 @@ p.nData {
 }
 
 .OrderedList {
-  --type-color: tomato;
+  --type-color: rgb(255, 80, 49);
 }
 
 .listItem {
-  --type-color: yellow;
+  --type-color: rgb(142, 236, 102);
 }
 
 .Codeblock {
-  --type-color: grey;
+  --type-color: rgb(59, 59, 59);
 }
 
 .Image {
@@ -257,15 +257,15 @@ p.nData {
 }
 
 .H2 {
-  --type-color: rgb(59, 59, 155);
+  --type-color: rgb(69, 128, 239);
 }
 
 .H3 {
-  --type-color: rgb(59, 59, 155);
+  --type-color: rgb(88, 88, 213);
 }
 
 .H4 {
-  --type-color: rgb(59, 59, 155);
+  --type-color: rgb(88, 88, 213);
 }
 
 .Blockquote {
@@ -273,7 +273,7 @@ p.nData {
 }
 
 .Hr {
-  --type-color: pink;
+  --type-color: rgb(26, 163, 165);
 }
 
 .IlSmall {
@@ -281,43 +281,43 @@ p.nData {
 }
 
 .IlCode {
-  --type-color: grey;
+  --type-color: rgb(87, 87, 87);
 }
 
 .IlItalic {
-  --type-color: white;
+  --type-color: rgb(255, 231, 176);
 }
 
 .IlBold {
-  --type-color: white;
+  --type-color: rgb(255, 207, 201);
 }
 
 .IlLink {
-  --type-color: lightskyblue;
+  --type-color: rgb(118, 201, 253);
 }
 
 .IlImage {
-  --type-color: green;
+  --type-color: rgb(20, 128, 20);
 }
 
 .IlMark {
-  --type-color: white;
+  --type-color: rgb(255, 230, 91);
 }
 
 .IlSubscript {
-  --type-color: white;
+  --type-color: rgb(229, 144, 255);
 }
 
 .IlSuperscript {
-  --type-color: white;
+  --type-color: rgb(181, 156, 255);
 }
 
 .IlStrikethrough {
-  --type-color: white;
+  --type-color: rgb(227, 149, 255);
 }
 
 .IlText {
-  --type-color: red;
+  --type-color: rgb(183, 155, 131);
 }
 
 
