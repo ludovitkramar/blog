@@ -16,6 +16,7 @@ export default function GraphViewer(props) {
     const [showNodes, setShowNodes] = useState(true)
     const [fullscreen, setFullscreen] = useState(false);
     const [showSettings, setShowSettings] = useState(true);
+    const [showGraph, setShowGraph] = useState(true);
     const graphContainer = useRef();
     const graphContainer2 = useRef();
     const loaded = useRef(false);
@@ -496,9 +497,6 @@ export default function GraphViewer(props) {
                     <button onClick={() => { setPaused(!paused) }}>
                         {paused ? 'Run' : 'Pause'}
                     </button>
-                    <button onClick={() => { setShowNodes(!showNodes) }}>
-                        {showNodes ? 'Hide nodes' : 'Show nodes'}
-                    </button>
                     <button onClick={toggleFullscreen}>
                         {fullscreen ? 'Exit full screen' : 'Full screen'}
                     </button>
@@ -506,6 +504,12 @@ export default function GraphViewer(props) {
                         Zoom:
                         <input className={style.range} type="range" onChange={handleZoom} min="2" max="200" step=".1"></input>
                     </label>
+                    <button onClick={() => { setShowNodes(!showNodes) }}>
+                        {showNodes ? 'Hide nodes' : 'Show nodes'}
+                    </button>
+                    <button onClick={() => { setShowGraph(!showGraph) }}>
+                        {showGraph ? 'Hide graph' : 'Show graph'}
+                    </button>
                     <div>
                         <Link to='/article/about/graph_viewer'>About GraphViewer</Link>
                     </div>
@@ -517,6 +521,7 @@ export default function GraphViewer(props) {
     }
 
     function generateReactCode(points) {
+        if (!showGraph) return [];
         var reactCode = [];
         points.forEach((point, node, points) => {
             const pointX = -point[1] * zoom + xOffset;
@@ -612,7 +617,7 @@ function Node(props) {
         }
     }
     return (
-        <div className={style.node} style={nodeStyle}>
+        <div className={`${style.node} ${style[props.type]}`} style={nodeStyle}>
             <span>{props.node}</span>
             <div className={style.nodedata} style={{ '--nodeID': `"${props.node}"`, }}>
                 <span className={style.nodeTitle}>{props.type}</span>

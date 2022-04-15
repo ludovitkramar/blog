@@ -124,7 +124,7 @@ div.sh:active {
     height: 50px;
     width: 50px;
     border-radius: 50%;
-    box-shadow: 0px 0px 7px -3px rgb(0, 0, 0), 0px 0px 3px -2px black;
+    box-shadow: 0px 0px 7px -3px black, 0px 0px 3px -2px black, inset 0px 0px 0px 3px var(--type-color);
     z-index: 102;
     background-color: white;
     color: black;
@@ -174,6 +174,7 @@ div.sh:active {
     top: 0px;
     left: 0px;
     background-color: rgb(255, 255, 255);
+    box-shadow: inset 0px 0px 0px 3px var(--type-color);
     border-radius: 50%;
     position: absolute;
     display: flex;
@@ -221,6 +222,102 @@ p.nData {
     top: 100px;
     left: 200px;
     transform: rotate(-30deg);
+}
+
+.root {
+  --type-color: black;
+}
+
+.Title {
+  --type-color: skyblue;
+}
+
+.Paragraph {
+  --type-color: blue;
+}
+
+.UnorderedList {
+  --type-color: orange;
+}
+
+.OrderedList {
+  --type-color: tomato;
+}
+
+.listItem {
+  --type-color: yellow;
+}
+
+.Codeblock {
+  --type-color: grey;
+}
+
+.Image {
+  --type-color:green;
+}
+
+.H2 {
+  --type-color: rgb(59, 59, 155);
+}
+
+.H3 {
+  --type-color: rgb(59, 59, 155);
+}
+
+.H4 {
+  --type-color: rgb(59, 59, 155);
+}
+
+.Blockquote {
+  --type-color: purple;
+}
+
+.Hr {
+  --type-color: pink;
+}
+
+.IlSmall {
+  --type-color: lightgrey;
+}
+
+.IlCode {
+  --type-color: grey;
+}
+
+.IlItalic {
+  --type-color: white;
+}
+
+.IlBold {
+  --type-color: white;
+}
+
+.IlLink {
+  --type-color: lightskyblue;
+}
+
+.IlImage {
+  --type-color: green;
+}
+
+.IlMark {
+  --type-color: white;
+}
+
+.IlSubscript {
+  --type-color: white;
+}
+
+.IlSuperscript {
+  --type-color: white;
+}
+
+.IlStrikethrough {
+  --type-color: white;
+}
+
+.IlText {
+  --type-color: red;
 }
 
 
