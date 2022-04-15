@@ -434,13 +434,15 @@ export default function GraphViewer(props) {
     }
 
     function handleTouchStart(e) {
-        startX = e.changedTouches[0].clientX;
-        startY = e.changedTouches[0].clientY;
-        isMouseDown = true;
         const ele = graphContainer2.current
-        ele.addEventListener('touchend', handleTouchEnd, false);
-        ele.addEventListener('touchmove', handleTouchMove, false);
-        ele.addEventListener('touchcancel', handleTouchEnd, false);
+        if (e.changedTouches.length === 1) {
+            startX = e.changedTouches[0].clientX;
+            startY = e.changedTouches[0].clientY;
+            isMouseDown = true;
+            ele.addEventListener('touchend', handleTouchEnd, false);
+            ele.addEventListener('touchmove', handleTouchMove, false);
+            ele.addEventListener('touchcancel', handleTouchEnd, false);
+        }
     }
 
     function handleTouchEnd() {
@@ -453,8 +455,10 @@ export default function GraphViewer(props) {
 
     function handleTouchMove(e) {
         if (isMouseDown) {
-            setxOffset(xOffset + e.changedTouches[0].clientY - startY)
-            setyOffset(yOffset + e.changedTouches[0].clientX - startX)
+            if (e.changedTouches.length === 1) {
+                setxOffset(xOffset + e.changedTouches[0].clientY - startY)
+                setyOffset(yOffset + e.changedTouches[0].clientX - startX)
+            }
         }
     }
 
@@ -485,7 +489,8 @@ export default function GraphViewer(props) {
     function settingsSh(show) {
         if (show) {
             return (
-                <><div>Ticks: {seconds} {paused ? ' (paused)' : ''}</div>
+                <>
+                    <div>Ticks: {seconds} {paused ? ' (paused)' : ''}</div>
                     <button onClick={() => { setPaused(!paused) }}>
                         {paused ? 'Run' : 'Pause'}
                     </button>
@@ -501,7 +506,8 @@ export default function GraphViewer(props) {
                     </label>
                     <div>
                         <Link to='/article/about/graph_viewer'>About GraphViewer</Link>
-                    </div></>
+                    </div>
+                </>
             )
         } else {
             return
