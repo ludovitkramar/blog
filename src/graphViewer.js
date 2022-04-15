@@ -110,22 +110,42 @@ export default function GraphViewer(props) {
                     }
                     //}
                 } else { //no cache
-                    if (typeof collisionCache[index] === 'undefined') collisionCache[index] = [] //create array for the line if it isn't there
+                    if (typeof collisionCache[index] === 'undefined') collisionCache[index] = [] //create cache storage array for the line if it isn't there
                     const m2 = value[0];
                     const n2 = value[1];
-                    // y = mx + n es el formato de la línea, pero para resolver la ecuación hay que convertirlo en: -mx + y = n
-                    [intrX, intrY] = calcularEcuacionDeDosIncognitas([-m1, 1, n1, -m2, 1, n2])
-                    //console.log(`Line y = ${m1}x + ${n1} collides at ${intrX},${intrY} with line ${index}`)
-                    if (!isNaN(intrX)) {
-                        const p3 = points[findParentOf(index, graph)];
-                        const p4 = points[index];
-                        //console.log(index, p3, p4);
-                        if (isPointBetweenTwoPoints([intrX, intrY], p1, p2, m1, n1)) {
-                            if (isPointBetweenTwoPoints([intrX, intrY], p3, p4, m2, n2)) { //there's no evidence that this works properly, p3 p4 may not be the points that we want
-                                collides = true;
-                                intersections.push([intrX, intrY]); //point of intersection
-                                linesCrossed.push(index); //id of line that was intersected
-                                collisionCache[index][currentLine] = [intrX, intrY] //save point to cache
+                    const p3 = points[findParentOf(index, graph)];
+                    const p4 = points[index];
+                    var shouldCompare = true;
+                    var pArray = [p1, p2, p3, p4].sort();
+                    switch (pArray[0]) {
+                        case p1:
+                            if (pArray[1] !== p2) shouldCompare = false
+                            break;
+                        case p2:
+                            if (pArray[1] !== p1) shouldCompare = false
+                            break;
+                        case p3:
+                            if (pArray[1] !== p4) shouldCompare = false
+                            break;
+                        case p4:
+                            if (pArray[1] !== p3) shouldCompare = false
+                            break;
+                        default:
+                            throw new Error('Hey fucker, check your code')
+                    }
+                    if (shouldCompare) {
+                        // y = mx + n es el formato de la línea, pero para resolver la ecuación hay que convertirlo en: -mx + y = n
+                        [intrX, intrY] = calcularEcuacionDeDosIncognitas([-m1, 1, n1, -m2, 1, n2])
+                        //console.log(`Line y = ${m1}x + ${n1} collides at ${intrX},${intrY} with line ${index}`)
+                        if (!isNaN(intrX)) {
+                            //console.log(index, p3, p4);
+                            if (isPointBetweenTwoPoints([intrX, intrY], p1, p2, m1, n1)) {
+                                if (isPointBetweenTwoPoints([intrX, intrY], p3, p4, m2, n2)) { //there's no evidence that this works properly, p3 p4 may not be the points that we want
+                                    collides = true;
+                                    intersections.push([intrX, intrY]); //point of intersection
+                                    linesCrossed.push(index); //id of line that was intersected
+                                    collisionCache[index][currentLine] = [intrX, intrY] //save point to cache
+                                }
                             }
                         }
                     }
