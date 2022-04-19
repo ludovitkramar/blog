@@ -4,6 +4,13 @@ import { Link } from "react-router-dom";
 import settings from "./settings";
 import GraphViewer from "./graphViewer";
 
+function findParentOf(node, graph) {
+    const LinksArray = graph.slice(2);
+    for (var index = 1; index < LinksArray.length; index += 2) {
+        if (LinksArray[index] === node) return LinksArray[index - 1];
+    }
+}
+
 export default function Markdown(props) {
     const [mdsrc, setmdsrc] = useState()
     const [tree, settree] = useState()
@@ -16,19 +23,12 @@ export default function Markdown(props) {
     const displayGraphBottom = props.graphBottom;
 
     useEffect(() => {
-        function findParentOf(node, graph) {
-            const LinksArray = graph.slice(2);
-            for (var index = 1; index < LinksArray.length; index += 2) {
-                if (LinksArray[index] === node) return LinksArray[index - 1];
-            }
-        }
-
         const G = [1, 0,]; //kantenliste
         const nD = [0];
         const nT = ['root'];
 
         function parser(markdown, graph, nodeData, nodeType, h) {
-            const newlineSpetialCharacters = ['# ', '##', '- ', '* ', '``', '![', '--', '**', '> '];
+            const newlineSpetialCharacters = ['# ', '##', '- ', '* ', '``', '![', '--', '**', '> ', '[^'];
             function getNodesCount() { return graph[0] };
             function updateNodesLinksCount() {
                 const linksArray = graph.slice(2);
@@ -61,6 +61,11 @@ export default function Markdown(props) {
                 if (isNaN(beforeSpace * 1)) return false
                 if (beforeSpace.slice(-1) !== '.') return false
                 return true
+            }
+
+            function isFootNote(input) {
+                if (input.indexOf(']') === input.indexOf(':') - 1) return true
+                return false;
             }
 
             function handleLineWithSpetialCharacters(line, rootNode) {
@@ -298,6 +303,13 @@ export default function Markdown(props) {
                 } else if (line === '---' || line === "***") { //hr
                     createNode('Hr', 0, rootNode)
                     consumeLine(1)
+                } else if (isFootNote(line)) {
+                    const footNoteData = {
+                        'name': line.substring(2, line.indexOf(']')),
+                        'text': line.slice(line.indexOf(':') + 1),
+                    }
+                    createNode("Footnote", footNoteData, rootNode)
+                    consumeLine(1)
                 } else {
                     console.error(`Error handling line with spetial characters at line: ${line}`)
                     createNode("Paragraph", line, rootNode)
@@ -366,7 +378,6 @@ export default function Markdown(props) {
 
             //inline parser, take into acount the recursion 
             const dataLength = nodeData.length;
-            const spetialInlineSymbols = ['<', '`'];
             function findNextPosOfChar(string, position, char) {
                 //string is the string in which to find the char
                 // position is from where start to look
@@ -409,7 +420,7 @@ export default function Markdown(props) {
                 const data = nodeData[node];
                 if (type.slice(0, 2) !== "Il" && typeof (data) === 'string') { //if type of current node doesn't start with "Il" (inline), and the data is a string
                     function parseIlString(data, node) {
-                        console.log(`To be parsed by inline parser: ${data}`);
+                        console.log(`Parsing string: "${data}" at node (${node})`);
                         var output = "";
                         var outpuType = "IlText" //default type is inline text
                         for (var charID = 0; charID < data.length; charID++) { //for every char in the string data
@@ -473,6 +484,22 @@ export default function Markdown(props) {
                                 case '[':
                                     if (output.length > 0) createNode(outpuType, output, node); //store text until this point
                                     output = "";
+                                    if (data[charID + 1] === '^') { //if it is a foot note
+                                        outpuType = "IlFootnote"
+                                        const footNoteEndPos = findNextPosOfChar(data, charID, ']')
+                                        if (footNoteEndPos === -1) {
+                                            outpuType = "IlText"
+                                            output += c
+                                            break;
+                                        }
+                                        const footnoteName = data.substring(charID + 2, footNoteEndPos);
+                                        const IlFootnoteData = {
+                                            'name': footnoteName,
+                                        }
+                                        createNode(outpuType, IlFootnoteData, node);
+                                        charID = footNoteEndPos //skip to after code 
+                                        break;
+                                    }
                                     //process inline link
                                     outpuType = "IlLink"
                                     const nextEndBracketPos = findNextPosOfChar(data, charID, ']')
@@ -740,33 +767,92 @@ export default function Markdown(props) {
             return [markdown, graph, nodeData, nodeType, h]
         }
 
-        const [mdsrcTemp, treeTemp, treeContentsTemp, treeTagsTemp, histryTemp] = parser(data.replaceAll('\t', '  ').split('\n'), G, nD, nT, { counter: 0, }); //replace all tabs with 2 spaces and create and array wheren each item is a line of the markdown document
+        var [mdsrcTemp, treeTemp, treeContentsTemp, treeTagsTemp, histryTemp] = parser(data.replaceAll('\t', '  ').split('\n'), G, nD, nT, { counter: 0, }); //replace all tabs with 2 spaces and create and array wheren each item is a line of the markdown document
+
+        //post processing after parsing
+
+        function firstBlockParentOf(node, graph, nodeType) {
+            if (nodeType[node].slice(0, 2) !== "Il") return node
+            var nodeid = node;
+            //console.log('firstBlockParentOf');
+            while (nodeType[nodeid].slice(0, 2) === "Il") {
+                //console.log(nodeid, nodeType[nodeid]);
+                nodeid = findParentOf(nodeid, graph)
+            }
+            return nodeid
+        }
+
+        //sort footnotes --------------------------------------------------------------------------
+        var firstBlockParentOfIlFootnote = {};
+        var blockParentsOfFootnotes = []
+
+        //get all footnotes
+        var footnotesIDs = [];
+
+        for (var n in treeTagsTemp) { //for every node with id n
+            if (treeTagsTemp[n] === 'IlFootnote') {
+                const footnoteName = treeContentsTemp[n].name;
+                //console.log(n, treeTagsTemp[n]);
+                const bparent = firstBlockParentOf(n * 1, treeTemp, treeTagsTemp);
+                firstBlockParentOfIlFootnote[n] = bparent;
+                blockParentsOfFootnotes.push(bparent);
+            } else if (treeTagsTemp[n] === 'Footnote') {
+                footnotesIDs.push(n);
+            }
+        }
+        blockParentsOfFootnotes = blockParentsOfFootnotes.sort((a, b) => a - b);
+
+        console.log('First block parent node of all IlFootnotes:');
+        console.log(firstBlockParentOfIlFootnote);
+        console.log(blockParentsOfFootnotes);
+
+        //after sorting the footnotes, number them
+        blockParentsOfFootnotes.forEach((v, i) => { //for each block parent node
+            //find node with smallest number in 'firstBlockParentOfIlFootnote' that has the current parent block node 'v'
+            const keys = Object.keys(firstBlockParentOfIlFootnote);
+            var candidates = [];
+            for (const id in keys) {
+                const IlFootnoteNode = keys[id];
+                //console.log(firstBlockParentOfIlFootnote[IlFootnoteNode]);
+                if (firstBlockParentOfIlFootnote[IlFootnoteNode] == v) candidates.push(IlFootnoteNode)
+            }
+            candidates = candidates.sort((a, b) => a - b);
+            console.log(candidates);
+            const currentIlFooterNode = candidates[0]; //this is our current node!
+            delete firstBlockParentOfIlFootnote[currentIlFooterNode];
+            console.log(firstBlockParentOfIlFootnote);
+
+            //set the number to Ilfootnote
+            treeContentsTemp[currentIlFooterNode]['number'] = i + 1;
+            const footnoteName = treeContentsTemp[currentIlFooterNode]['name']; //name of current IlFootnote
+            //set the same number to the Footnote with the same name
+            footnotesIDs.forEach((fid) => { //for every Footnote
+                if (treeContentsTemp[fid]['name'] === footnoteName) treeContentsTemp[fid]['number'] = i + 1;
+            })
+        })
+        //end sort footnotes --------------------------------------------------------------------------
+
+        //results
+        console.log('🟢 Results:');
+        console.log(mdsrcTemp);
+        console.log(treeTemp);
+        console.log(treeContentsTemp);
+        console.log(treeTagsTemp);
+        console.log('🟡 Results:');
+        console.log(histryTemp)
+
+        //save results, this will trigger render
         setmdsrc(mdsrcTemp);
         settree(treeTemp);
         settreeContents(treeContentsTemp);
         settreeTags(treeTagsTemp);
         sethistry(histryTemp);
         setLoading(false);
-
-        console.log('🟢 Results:');
-        console.log(mdsrc);
-        console.log(tree);
-        console.log(treeContents);
-        console.log(treeTags);
-        console.log('🟡 Results:');
-        console.log(histry)
-
     }, [data])
 
     if (loading) return <span>Parsing markdown...</span>
 
-    function renderMarkdown(graph, nodeData, nodeType, root) {
-        // var res = [];
-        // for (const key in graph) {
-        //     res.push(<Text key={key} text={graph[key]}></Text>);
-        // }
-        // return res
-
+    function recursiveGenReactComponent(graph, nodeData, nodeType, root) {
         //create array nodes of every node connected to root
         var links = graph.slice(2);
         var nodes = [];
@@ -792,19 +878,19 @@ export default function Markdown(props) {
             // }
             switch (nodeType[value]) {
                 case 'Title':
-                    return <Title key={value} text={renderMarkdown(graph, nodeData, nodeType, value)}></Title>
+                    return <Title key={value} text={recursiveGenReactComponent(graph, nodeData, nodeType, value)}></Title>
 
                 case 'Paragraph':
-                    return <Paragraph key={value} content={renderMarkdown(graph, nodeData, nodeType, value)}></Paragraph>
+                    return <Paragraph key={value} content={recursiveGenReactComponent(graph, nodeData, nodeType, value)}></Paragraph>
 
                 case 'listItem':
-                    return <ListItem key={value} text={renderMarkdown(graph, nodeData, nodeType, value)}></ListItem>
+                    return <ListItem key={value} text={recursiveGenReactComponent(graph, nodeData, nodeType, value)}></ListItem>
 
                 case 'UnorderedList':
-                    return <UnorderedList key={value} list={renderMarkdown(graph, nodeData, nodeType, value)}></UnorderedList>
+                    return <UnorderedList key={value} list={recursiveGenReactComponent(graph, nodeData, nodeType, value)}></UnorderedList>
 
                 case 'OrderedList':
-                    return <OrderedList key={value} list={renderMarkdown(graph, nodeData, nodeType, value)}></OrderedList>
+                    return <OrderedList key={value} list={recursiveGenReactComponent(graph, nodeData, nodeType, value)}></OrderedList>
 
                 case 'Codeblock':
                     return <Codeblock key={value} code={data}></Codeblock>
@@ -813,59 +899,78 @@ export default function Markdown(props) {
                     return <Image key={value} src={data.src} alt={data.alt} title={data.title}></Image>
 
                 case 'H2':
-                    return <H2 key={value} text={renderMarkdown(graph, nodeData, nodeType, value)}></H2>
+                    return <H2 key={value} text={recursiveGenReactComponent(graph, nodeData, nodeType, value)}></H2>
 
                 case 'H3':
-                    return <H3 key={value} text={renderMarkdown(graph, nodeData, nodeType, value)}></H3>
+                    return <H3 key={value} text={recursiveGenReactComponent(graph, nodeData, nodeType, value)}></H3>
 
                 case 'H4':
-                    return <H4 key={value} text={renderMarkdown(graph, nodeData, nodeType, value)}></H4>
+                    return <H4 key={value} text={recursiveGenReactComponent(graph, nodeData, nodeType, value)}></H4>
 
                 case 'Hr':
                     return <Hr key={value}></Hr>
 
                 case 'Blockquote':
-                    return <Blockquote key={value} quote={renderMarkdown(graph, nodeData, nodeType, value)}></Blockquote>
+                    return <Blockquote key={value} quote={recursiveGenReactComponent(graph, nodeData, nodeType, value)}></Blockquote>
 
                 case 'IlSmall':
-                    return <IlSmall key={value} text={renderMarkdown(graph, nodeData, nodeType, value)} />
+                    return <IlSmall key={value} text={recursiveGenReactComponent(graph, nodeData, nodeType, value)} />
 
                 case 'IlCode':
                     return <IlCode key={value} code={data} />
 
                 case "IlItalic":
-                    return <IlItalic key={value} text={renderMarkdown(graph, nodeData, nodeType, value)} />
+                    return <IlItalic key={value} text={recursiveGenReactComponent(graph, nodeData, nodeType, value)} />
 
                 case "IlBold":
-                    return <IlBold key={value} text={renderMarkdown(graph, nodeData, nodeType, value)} />
+                    return <IlBold key={value} text={recursiveGenReactComponent(graph, nodeData, nodeType, value)} />
 
                 case "IlText":
                     return <IlText key={value} text={data} />
 
                 case "IlLink":
-                    return <IlLink key={value} href={data.href} title={data.title} text={renderMarkdown(graph, nodeData, nodeType, value)} />
+                    return <IlLink key={value} href={data.href} title={data.title} text={recursiveGenReactComponent(graph, nodeData, nodeType, value)} />
 
                 case "IlImage":
                     return <IlImage key={value} src={data.src} alt={data.alt} title={data.title}></IlImage>
 
                 case "IlMark":
-                    return <IlMark key={value} text={renderMarkdown(graph, nodeData, nodeType, value)} />
+                    return <IlMark key={value} text={recursiveGenReactComponent(graph, nodeData, nodeType, value)} />
 
                 case "IlSubscript":
-                    return <IlSubscript key={value} text={renderMarkdown(graph, nodeData, nodeType, value)} />
+                    return <IlSubscript key={value} text={recursiveGenReactComponent(graph, nodeData, nodeType, value)} />
 
                 case "IlSuperscript":
-                    return <IlSuperscript key={value} text={renderMarkdown(graph, nodeData, nodeType, value)} />
+                    return <IlSuperscript key={value} text={recursiveGenReactComponent(graph, nodeData, nodeType, value)} />
 
                 case "IlStrikethrough":
-                    return <IlStrikethrough key={value} text={renderMarkdown(graph, nodeData, nodeType, value)} />
+                    return <IlStrikethrough key={value} text={recursiveGenReactComponent(graph, nodeData, nodeType, value)} />
+
+                case "IlFootnote":
+                    //TODO: actual Ilfootnote element
+                    return <IlSuperscript key={value} text={<IlLink href={`#Footnote_${data.name}`} text={data.number}></IlLink>} ></IlSuperscript>
+
+                case "Footnote":
+                    return <EmptyElement key={value} />
 
                 default:
                     console.error(`Unknown data type: ${nodeType[value]}`)
                     return <IlText key={value} text={data} />
             }
-        })
+        })        
         return code;
+    }
+
+    function genReactComponent(graph, nodeData, nodeType, root) {
+        var code = recursiveGenReactComponent(graph, nodeData, nodeType, root);
+        //handle footnotes
+        var footnotes = []; //objects of the footnotes
+        for (const node in nodeType) {
+            if (nodeType[node] === 'Footnote') footnotes.push(nodeData[node])
+        }
+        console.log(footnotes);
+
+        return code
     }
 
     function renderGraph(bool) {
@@ -876,7 +981,7 @@ export default function Markdown(props) {
     return (
         <>
             {renderGraph(displayGraphTop)}
-            {renderMarkdown(tree, treeContents, treeTags, 0)}
+            {genReactComponent(tree, treeContents, treeTags, 0)}
             {renderGraph(displayGraphBottom)}
         </>
     );
@@ -1042,4 +1147,8 @@ function IlSuperscript(props) {
     return (
         <sup className={style.sup}>{props.text}</sup>
     )
+}
+
+function EmptyElement() {
+    return <></>
 }
