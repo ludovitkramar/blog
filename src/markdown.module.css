@@ -135,3 +135,24 @@ code.code {
     margin-top: 11px;
     margin-bottom: 12px;
 }
+
+.footnoteList {
+    border-top: 1px solid gray;
+    margin-top: 1em;
+    margin-bottom: 1em;
+    font-size: 13px;
+    font-family: 'STIX Two Text', serif;
+    padding-left: 2em;
+    padding-top: .4em;
+}
+  
+.footnoteItem {
+  padding-top: .5em;
+  padding-bottom: .3em;
+  color: #555;
+}
+  
+.highlightFootnote {
+    background-color: rgba(127, 200, 255, 0.119);
+}
+  

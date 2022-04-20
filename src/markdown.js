@@ -978,34 +978,37 @@ export default function Markdown(props) {
         //handle footnotes
         var footnotes = []; //node ids of the footnotes
         for (const node in nodeType) {
-            if (nodeType[node] === 'Footnote') footnotes.push(node) //for some reason 'node' is a str
+            if (nodeType[node] === 'Footnote') footnotes.push(node)
         }
 
-        //create the react component of the footnotes in the form of a list
-        var footNoteCode = [];
-        var fIndex = 1;
-        const ffCount = footnotes.length;
-        for (var ff = 0; ff < ffCount; ff++) {
-            for (var f = 0; f < footnotes.length; f++) {
-                const footnoteNode = footnotes[f];
-                if (nodeData[footnoteNode]['number'] === fIndex) {
-                    const footnoteContentNode = getFirstChildOf(graph, footnoteNode * 1)
-                    footNoteCode.push(
-                        <li className={style.footnoteItem} id={`Footnote_${nodeData[footnoteNode]['name']}`}>
-                            {recursiveGenReactComponent(graph, nodeData, nodeType, footnoteContentNode)}
-                            <IlSuperscript text={<IlLink href={`#FootnoteLink_${nodeData[footnoteNode]['name']}`} text={`Back to text`}></IlLink>} />
-                        </li>
-                    )
-                    footnotes.splice(f, 1);
+        if (footnotes.length > 0) { //if there's at least one footnote
+            //create the react component of the footnotes in the form of a list
+            var footNoteCode = [];
+            var fIndex = 1;
+            const ffCount = footnotes.length;
+            for (var ff = 0; ff < ffCount; ff++) {
+                for (var f = 0; f < footnotes.length; f++) {
+                    const footnoteNode = footnotes[f]; //for some reason this is a str?
+                    if (nodeData[footnoteNode]['number'] === fIndex) {
+                        const footnoteContentNode = getFirstChildOf(graph, footnoteNode * 1)
+                        footNoteCode.push(
+                            <FootnoteContent key={fIndex}
+                                id={`Footnote_${nodeData[footnoteNode]['name']}`}
+                                text={recursiveGenReactComponent(graph, nodeData, nodeType, footnoteContentNode)}
+                                href={`#FootnoteLink_${nodeData[footnoteNode]['name']}`} />
+                        )
+                        footnotes.splice(f, 1);
+                    }
                 }
+                fIndex += 1;
             }
-            fIndex += 1;
+            if (footnotes.length > 0) console.warn('These footnotes are not valid: ', footnotes)
+
+            footNoteCode = <ol key='footNotesContainer' className={style.footnoteList}>{footNoteCode}</ol>
+            code = code.concat(footNoteCode)
         }
-        if (footnotes.length > 0) console.warn('These footnotes are not valid: ', footnotes)
 
-        footNoteCode = <ol className={style.footnoteList}>{footNoteCode}</ol>
-
-        return code.concat(footNoteCode)
+        return code
     }
 
     function renderGraph(bool) {
@@ -1190,4 +1193,34 @@ function EmptyElement() {
 
 function IlFootnote(props) {
     return <sup id={`FootnoteLink_${props.name}`}><IlLink href={`#Footnote_${props.name}`} text={props.number}></IlLink></sup>
+}
+
+function FootnoteContent(props) {
+    const [highlight, setHighlight] = useState(false)
+    //highlight footnote when user clicks on IlFootnote, TODO: make it work when going from one article to another
+    useEffect(() => {
+        window.addEventListener('hashchange', handleHashChange)
+        function handleHashChange(e) {
+            const hash = e.newURL.slice(e.newURL.lastIndexOf('#') + 1)
+            console.log(props.id);
+            if (hash === props.id) { //if hash is this footnote
+                console.log(document.getElementById(hash));
+                setHighlight(true);
+                setTimeout(() => {
+                    setHighlight(false);
+                }, 2000);
+            }
+            console.log(e)
+            console.log(hash);
+        }
+
+        return () => { window.removeEventListener('hashchange', handleHashChange) }
+    }, [])
+
+    return (
+        <li className={!highlight ? style.footnoteItem : style.footnoteItem + ' ' + style.highlightFootnote} id={props.id}>
+            {props.text}{'  '}
+            <IlSmall text={<IlLink href={props.href} text={`Back to text`}></IlLink>} />
+        </li>
+    )
 }
