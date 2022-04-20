@@ -419,6 +419,44 @@ export default function Markdown(props) {
                 return indexOfInput + position + 1
             }
 
+
+            function extractLink(text) { //http and https only
+                if (text.slice(0, 7) === 'http://' || text.slice(0, 8) === 'https://') {
+                    const unsafeChars = ['"', '<', '>', '{', '}', '|', '\\', '^', '`', ' '];
+                    const trimLastCharIf = ['.', ',', ':', ';'];
+                    var isValid = true;
+                    const protocol = text.slice(0, text.indexOf('://') + 3);
+                    const afterprotocol = text.slice(text.indexOf('://') + 3);
+                    var baseAndPath = ''
+                    var openParenthesis = 0;
+                    var openSquareParenthesis = 0;
+                    for (const key in afterprotocol) {
+                        const char = afterprotocol[key];
+                        if (unsafeChars.includes(char)) {
+                            break;
+                        } else { //no unsafe chars
+                            baseAndPath += char;
+                            if (char === '(') openParenthesis += 1;
+                            if (char === ')') openParenthesis -= 1;
+                            if (char === '[') openSquareParenthesis += 1;
+                            if (char === ']') openSquareParenthesis -= 1;
+                            if (openSquareParenthesis < 0 || openParenthesis < 0) { //stop if ) or ] appears wihout first ( or [
+                                baseAndPath = baseAndPath.slice(0, -1);
+                                break;
+                            }
+                        }
+                    }
+                    const lastChar = baseAndPath.slice(-1);
+                    if (trimLastCharIf.includes(lastChar)) baseAndPath = baseAndPath.slice(0, -1);
+                    const link = protocol + baseAndPath
+                    console.log(link);
+                    if (isValid) return link
+                    else return -1
+                } else {
+                    return -1
+                }
+            }
+
             for (var node = 0; node < dataLength; node++) { //for every non inline node 
                 const type = nodeType[node];
                 const data = nodeData[node];
@@ -481,6 +519,27 @@ export default function Markdown(props) {
                                         break;
                                     } else {
                                         //treat as normal text
+                                        outpuType = "IlText"
+                                        output += c
+                                        break;
+                                    }
+                                case 'h': //detect link
+                                    const strAfterC = data.slice(charID)
+                                    console.log(strAfterC);
+                                    const link = extractLink(strAfterC)
+                                    if (link !== -1) { //if real link
+                                        if (output.length > 0) createNode(outpuType, output, node); //store text until this point
+                                        output = "";
+                                        outpuType = "IlLink"
+                                        const linkObj = {
+                                            'href': link,
+                                            'title': link,
+                                        }
+                                        const linkNode = createNode(outpuType, linkObj, node);
+                                        createNode('IlText', link, linkNode)
+                                        charID = charID + link.length - 1 //skip to after detected link 
+                                        break;
+                                    } else {
                                         outpuType = "IlText"
                                         output += c
                                         break;
@@ -1138,6 +1197,7 @@ function IlBold(props) {
 }
 
 function IlLink(props) {
+    console.log(props);
     var href = props.href;
     if (href.slice(0, 4) !== "http") {
         if (href[0] === '#') {
@@ -1151,6 +1211,7 @@ function IlLink(props) {
     return (
         <a href={href} title={props.title} target="_blank" rel="noreferrer" className={style.a}>{props.text}</a>
     )
+
 }
 
 function IlImage(props) {
