@@ -961,20 +961,49 @@ export default function Markdown(props) {
                     console.error(`Unknown data type: ${nodeType[value]}`)
                     return <IlText key={value} text={data} />
             }
-        })        
+        })
         return code;
+    }
+
+    function getFirstChildOf(graph, node) {
+        const links = graph.slice(2);
+        for (var i = 0; i < links.length; i += 2) {
+            if (links[i] === node) return links[i + 1]
+        }
+        return -1
     }
 
     function genReactComponent(graph, nodeData, nodeType, root) {
         var code = recursiveGenReactComponent(graph, nodeData, nodeType, root);
-        //handle footnotes
-        var footnotes = []; //objects of the footnotes
-        for (const node in nodeType) {
-            if (nodeType[node] === 'Footnote') footnotes.push(node)
-        }
-        console.log(footnotes);
 
-        return code
+        //handle footnotes
+        var footnotes = []; //node ids of the footnotes
+        for (const node in nodeType) {
+            if (nodeType[node] === 'Footnote') footnotes.push(node) //for some reason 'node' is a str
+        }
+
+        //create the react component of the footnotes in the form of a list
+        var footNoteCode = [];
+        var fIndex = 1;
+        const ffCount = footnotes.length;
+        for (var ff = 0; ff < ffCount; ff++) {
+            for (var f = 0; f < footnotes.length; f++) {
+                const footnoteNode = footnotes[f];
+                if (nodeData[footnoteNode]['number'] === fIndex) {
+                    const footnoteContentNode = getFirstChildOf(graph, footnoteNode * 1)
+                    footNoteCode.push(
+                        <li>{recursiveGenReactComponent(graph, nodeData, nodeType, footnoteContentNode)}</li>
+                        )
+                    footnotes.splice(f, 1);
+                }
+            }
+            fIndex += 1;
+        }
+        if (footnotes.length > 0) console.warn('These footnotes are not valid: ', footnotes)
+
+        footNoteCode = <ol>{footNoteCode}</ol>
+
+        return code.concat(footNoteCode)
     }
 
     function renderGraph(bool) {
