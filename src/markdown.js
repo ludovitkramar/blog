@@ -951,8 +951,7 @@ export default function Markdown(props) {
                     return <IlStrikethrough key={value} text={recursiveGenReactComponent(graph, nodeData, nodeType, value)} />
 
                 case "IlFootnote":
-                    //TODO: actual Ilfootnote element
-                    return <IlSuperscript key={value} text={<IlLink href={`#Footnote_${data.name}`} text={data.number}></IlLink>} ></IlSuperscript>
+                    return <IlFootnote key={value} name={data.name} number={data.number} />
 
                 case "Footnote":
                     return <EmptyElement key={value} />
@@ -992,8 +991,11 @@ export default function Markdown(props) {
                 if (nodeData[footnoteNode]['number'] === fIndex) {
                     const footnoteContentNode = getFirstChildOf(graph, footnoteNode * 1)
                     footNoteCode.push(
-                        <li>{recursiveGenReactComponent(graph, nodeData, nodeType, footnoteContentNode)}</li>
-                        )
+                        <li className={style.footnoteItem} id={`Footnote_${nodeData[footnoteNode]['name']}`}>
+                            {recursiveGenReactComponent(graph, nodeData, nodeType, footnoteContentNode)}
+                            <IlSuperscript text={<IlLink href={`#FootnoteLink_${nodeData[footnoteNode]['name']}`} text={`Back to text`}></IlLink>} />
+                        </li>
+                    )
                     footnotes.splice(f, 1);
                 }
             }
@@ -1001,7 +1003,7 @@ export default function Markdown(props) {
         }
         if (footnotes.length > 0) console.warn('These footnotes are not valid: ', footnotes)
 
-        footNoteCode = <ol>{footNoteCode}</ol>
+        footNoteCode = <ol className={style.footnoteList}>{footNoteCode}</ol>
 
         return code.concat(footNoteCode)
     }
@@ -1184,4 +1186,8 @@ function IlSuperscript(props) {
 
 function EmptyElement() {
     return <></>
+}
+
+function IlFootnote(props) {
+    return <sup id={`FootnoteLink_${props.name}`}><IlLink href={`#Footnote_${props.name}`} text={props.number}></IlLink></sup>
 }
