@@ -306,9 +306,13 @@ export default function Markdown(props) {
                 } else if (isFootNote(line)) {
                     const footNoteData = {
                         'name': line.substring(2, line.indexOf(']')),
-                        'text': line.slice(line.indexOf(':') + 1),
                     }
-                    createNode("Footnote", footNoteData, rootNode)
+                    var footnoteText = line.slice(line.indexOf(':') + 1);
+                    while (footnoteText[0] === ' ') {
+                        footnoteText = footnoteText.slice(1)
+                    }
+                    const footnoteNode = createNode("Footnote", footNoteData, rootNode)
+                    createNode("FootnoteContent", footnoteText, footnoteNode)
                     consumeLine(1)
                 } else {
                     console.error(`Error handling line with spetial characters at line: ${line}`)
@@ -966,7 +970,7 @@ export default function Markdown(props) {
         //handle footnotes
         var footnotes = []; //objects of the footnotes
         for (const node in nodeType) {
-            if (nodeType[node] === 'Footnote') footnotes.push(nodeData[node])
+            if (nodeType[node] === 'Footnote') footnotes.push(node)
         }
         console.log(footnotes);
 
