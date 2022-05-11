@@ -6,6 +6,7 @@ import './index.css';
 import Nav from './navigation';
 import Article from './article';
 import settings from './settings';
+import Footer from './footer';
 
 function Page() {
   const [articlesList, setArticlesList] = useState([]);
@@ -67,6 +68,7 @@ function Page() {
           {createRouteRecursionFestival(articlesList, [])}
         </Route>
       </Routes>
+    <Footer />
     </BrowserRouter>
   );
 

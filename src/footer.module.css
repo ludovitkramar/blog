@@ -1,0 +1,41 @@
+.footer {
+    background-color: #4d5152;
+    color: rgb(224, 231, 249);
+    border-radius: .6em;
+    max-width: 600px;
+    margin: 0 auto;
+    margin-top: 1em;
+    margin-bottom: 1em;
+    padding: 1em;
+    font-weight: 400;
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    text-align: center;
+    opacity: .9;
+    transition: .3s;
+}
+
+footer:hover {
+    opacity: 1;
+}
+
+.list {
+    margin: 0;
+    padding: 0;
+    padding-top: .4em;
+}
+
+.list > li {
+    display: inline;
+    padding-left: .4em;
+    padding-right: .4em;
+    border-left: 1px solid #666;
+}
+
+.list > li:first-child {
+    border-left: 0px;
+}
+
+.a {
+    color: rgb(187, 193, 209);
+}
