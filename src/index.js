@@ -8,6 +8,7 @@ import Article from './article';
 import settings from './settings';
 import Footer from './footer';
 import Welcome from './welcome';
+import NotFound from './404';
 
 function Page() {
   const [articlesList, setArticlesList] = useState([]);
@@ -65,7 +66,7 @@ function Page() {
       <Routes>
         <Route path="/" element={<Nav articlesList={articlesList} />}>
           <Route index element={<Welcome></Welcome>} />
-          <Route path="*" element={<span>404 error</span>} />
+          <Route path="*" element={<NotFound />} />
           {createRouteRecursionFestival(articlesList, [])}
         </Route>
       </Routes>
