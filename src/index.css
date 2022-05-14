@@ -13,6 +13,7 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   background-color: #e2ecf3;
+  overflow-x: hidden;
 }
 
 @media (prefers-color-scheme: dark) {

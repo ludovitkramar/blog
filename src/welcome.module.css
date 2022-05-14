@@ -45,3 +45,70 @@
     border-radius: 1em;
     box-shadow: 0px 0px 20px -2px #ffffff6a, 0px 1px 5px -2px #fff;
 }
+
+.graphics {
+    background-color: rgb(34, 34, 34);
+    border-radius: .2em;
+    padding: .5em .4em .4em .4em ;
+    margin-top: .4em;
+}
+
+.icon {
+    max-height: 48px;
+}
+
+.photo {
+    display: block;
+    max-width: 80%;
+    background-image: url('./graph.png');
+    background-position: center;
+    background-attachment: fixed;
+    background-size: contain;
+}
+
+.section {
+    max-height: 300px;
+    overflow: hidden;
+    width: 600px;
+    max-width: 90vw;
+    border: 1px solid rgb(40, 40, 40);
+    border-radius: 1em;
+    padding: 1em;
+    margin-top: .2em;
+    margin-bottom: .2em;
+    text-shadow: 0px 0px 2em white;
+    box-shadow: inset 0px 0px 2em 10px black;
+}
+
+.iblock {
+    display: inline-block;
+    box-shadow: 0px 0px 2em 20px black;
+    border-radius: 1em;
+    background-color: black;
+}
+
+.table {
+    text-align: left;
+    border-collapse: collapse;
+    width: 100%;
+    margin-top: .5em;
+}
+
+.th {
+    border: 1px solid white;
+    background-color: #222;
+}
+
+.feature {
+    border: 1px solid white;
+}
+
+.supported {
+    border: 1px solid white;
+    background-color: #141;
+}
+
+.unsupported {
+    border: 1px solid white;
+    background-color: #411;
+}
