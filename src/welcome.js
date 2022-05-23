@@ -11,7 +11,7 @@ export default function Welcome(props) {
                 <span>Markdown syntax based dynamic blog system written in React.js</span>
             </div>
             <div className={style.section}>
-                <h2>Text to web</h2>
+                <h2>Text in, website out</h2>
                 <span>Never has been so easy</span>
                 <div className={style.graphics}>
                     <img className={style.icon} src={textfileIcon}></img>
@@ -37,11 +37,83 @@ export default function Welcome(props) {
                     </thead>
                     <tbody>
                         <tr>
-                            <td className={style.feature}>Bold text</td>
+                            <td className={style.feature}>Heading</td>
+                            <td className={style.partial}>With # only</td>
+                        </tr>
+                        <tr>
+                            <td className={style.feature}>Bold</td>
+                            <td className={style.partial}>With * only</td>
+                        </tr>
+                        <tr>
+                            <td className={style.feature}>Italic</td>
+                            <td className={style.partial}>With * only</td>
+                        </tr>
+                        <tr>
+                            <td className={style.feature}>Blockquote</td>
                             <td className={style.supported}>Yes</td>
                         </tr>
                         <tr>
-                            <td className={style.feature}>Bad thing</td>
+                            <td className={style.feature}>Ordered List</td>
+                            <td className={style.supported}>Yes</td>
+                        </tr>
+                        <tr>
+                            <td className={style.feature}>Unrdered List</td>
+                            <td className={style.supported}>Yes</td>
+                        </tr>
+                        <tr>
+                            <td className={style.feature}>Code</td>
+                            <td className={style.supported}>Yes</td>
+                        </tr>
+                        <tr>
+                            <td className={style.feature}>Horizontal Rule</td>
+                            <td className={style.partial}>With *** or ---</td>
+                        </tr>
+                        <tr>
+                            <td className={style.feature}>Link</td>
+                            <td className={style.supported}>Yes</td>
+                        </tr>
+                        <tr>
+                            <td className={style.feature}>Image</td>
+                            <td className={style.supported}>Yes</td>
+                        </tr>
+                        <tr>
+                            <td className={style.feature}>Table</td>
+                            <td className={style.unsupported}>No</td>
+                        </tr>
+                        <tr>
+                            <td className={style.feature}>Fenced Code Block</td>
+                            <td className={style.supported}>Yes</td>
+                        </tr>
+                        <tr>
+                            <td className={style.feature}>Footnote</td>
+                            <td className={style.supported}>Yes</td>
+                        </tr>
+                        <tr>
+                            <td className={style.feature}>Heading ID</td>
+                            <td className={style.unsupported}>No</td>
+                        </tr>
+                        <tr>
+                            <td className={style.feature}>Definition List</td>
+                            <td className={style.unsupported}>No</td>
+                        </tr>
+                        <tr>
+                            <td className={style.feature}>Emoji</td>
+                            <td className={style.partial}>Unicode Emojis</td>
+                        </tr>
+                        <tr>
+                            <td className={style.feature}>Highlight</td>
+                            <td className={style.supported}>Yes</td>
+                        </tr>
+                        <tr>
+                            <td className={style.feature}>Subscript</td>
+                            <td className={style.supported}>Yes</td>
+                        </tr>
+                        <tr>
+                            <td className={style.feature}>Superscript</td>
+                            <td className={style.supported}>Yes</td>
+                        </tr>
+                        <tr>
+                            <td className={style.feature}>HTML</td>
                             <td className={style.unsupported}>No</td>
                         </tr>
                     </tbody>

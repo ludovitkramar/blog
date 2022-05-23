@@ -67,7 +67,6 @@
 }
 
 .section {
-    max-height: 300px;
     overflow: hidden;
     width: 600px;
     max-width: 90vw;
@@ -110,4 +109,9 @@
 .unsupported {
     border: 1px solid white;
     background-color: #411;
+}
+
+.partial {
+    border: 1px solid white;
+    background-color: rgb(66, 68, 17);
 }
