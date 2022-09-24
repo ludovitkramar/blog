@@ -1,6 +1,6 @@
 # kykvit blog
 
-Visit at: blog.kykvit.com
+Visit at: https://blog.kykvit.com
 
 About markdown parser: https://blog.kykvit.com/article/about/parser
 
